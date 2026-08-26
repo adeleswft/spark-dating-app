@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    width: 1080px; height: 1920px; 
+    background: #0A0A0A; 
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden; display: flex; flex-direction: column; align-items: center;
+  }
+  
+  .status-bar {
+    width: 100%; height: 88px; padding: 40px 48px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    color: #8A8A8E; font-size: 28px;
+  }
+  
+  .header { padding: 20px 48px; width: 100%; }
+  .back-text { font-size: 32px; color: #8A8A8E; }
+  .title { font-size: 48px; font-weight: 800; color: #F0F0F0; margin-top: 20px; }
+  .subtitle { font-size: 26px; color: #8A8A8E; margin-top: 12px; line-height: 1.5; }
+  
+  .badges {
+    width: 900px; margin: 60px 0;
+  }
+  
+  .badge {
+    display: flex; align-items: center; gap: 24px;
+    padding: 32px; margin-bottom: 20px;
+    background: #161618; border: 1px solid #1E1E22;
+    border-radius: 20px;
+  }
+  
+  .badge-icon {
+    width: 80px; height: 80px; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+  }
+  
+  .badge-icon.phone { background: rgba(0,230,118,0.15); }
+  .badge-icon.photo { background: rgba(124,77,255,0.15); }
+  .badge-icon.id { background: rgba(255,214,0,0.15); }
+  
+  .badge-info { flex: 1; }
+  .badge-name { font-size: 28px; font-weight: 700; color: #F0F0F0; }
+  .badge-desc { font-size: 22px; color: #5A5A5E; margin-top: 4px; }
+  
+  .badge-status {
+    padding: 10px 20px; border-radius: 12px;
+    font-size: 22px; font-weight: 600;
+  }
+  
+  .badge-status.verified { background: rgba(0,230,118,0.15); color: #00E676; }
+  .badge-status.pending { background: rgba(255,214,0,0.15); color: #FFD600; }
+  .badge-status.locked { background: rgba(90,90,94,0.15); color: #5A5A5E; }
+  
+  .boost-card {
+    width: 900px; margin: 40px 0; padding: 32px;
+    background: linear-gradient(135deg, #0D1F15, #0A0A0A);
+    border: 2px solid #00E676; border-radius: 24px;
+  }
+  
+  .boost-title {
+    font-size: 32px; font-weight: 700; color: #00E676; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  
+  .boost-text { font-size: 26px; color: #8A8A8E; line-height: 1.6; }
+  
+  .boost-btn {
+    margin-top: 24px; background: #00E676; color: #0A0A0A;
+    padding: 16px 40px; border-radius: 12px;
+    font-size: 26px; font-weight: 700; display: inline-block;
+  }
+  
+  .tip {
+    width: 900px; margin: 20px 0; padding: 24px;
+    background: #161618; border-radius: 16px;
+  }
+  .tip-title { font-size: 24px; font-weight: 600; color: #FFD600; margin-bottom: 8px; }
+  .tip-text { font-size: 24px; color: #8A8A8E; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>⚡ 100%</span>
+  </div>
+  
+  <div class="header">
+    <span class="back-text">← Back</span>
+    <div class="title">Verification</div>
+    <div class="subtitle">Build trust with potential matches by verifying your identity</div>
+  </div>
+  
+  <div class="badges">
+    <div class="badge">
+      <div class="badge-icon phone">📱</div>
+      <div class="badge-info">
+        <div class="badge-name">Phone Verified</div>
+        <div class="badge-desc">Confirm your phone number</div>
+      </div>
+      <div class="badge-status verified">✓ Verified</div>
+    </div>
+    
+    <div class="badge">
+      <div class="badge-icon photo">📸</div>
+      <div class="badge-info">
+        <div class="badge-name">Photo Verified</div>
+        <div class="badge-desc">Liveness detection + pose match</div>
+      </div>
+      <div class="badge-status verified">✓ Verified</div>
+    </div>
+    
+    <div class="badge">
+      <div class="badge-icon id">🪪</div>
+      <div class="badge-info">
+        <div class="badge-name">ID Verified</div>
+        <div class="badge-desc">Government ID verification</div>
+      </div>
+      <div class="badge-status pending">Pending</div>
+    </div>
+  </div>
+  
+  <div class="boost-card">
+    <div class="boost-title">⚡ Priority Placement</div>
+    <div class="boost-text">
+      Verified profiles appear higher in discovery. Users who verify all 3 badges get a <strong style="color: #00E676;">2x visibility boost</strong> in the matching algorithm.
+    </div>
+    <div class="boost-btn">Start Photo Verification</div>
+  </div>
+  
+  <div class="tip">
+    <div class="tip-title">💡 Pro Tip</div>
+    <div class="tip-text">
+      Profiles with at least 2 verification badges receive <strong style="color: #F0F0F0;">3x more matches</strong> on average.
+    </div>
+  </div>
+</body>
+</html>

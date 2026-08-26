@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: spark-db
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: spark
+      POSTGRES_PASSWORD: spark_dev_password
+      POSTGRES_DB: spark
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/api/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U spark']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: spark-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: spark-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgres://spark:spark_dev_password@postgres:5432/spark
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: spark-dev-secret-change-in-production
+      AI_SERVICE_URL: http://ai:8000
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai:
+        condition: service_started
+
+  ai:
+    build:
+      context: ./packages/ai
+      dockerfile: Dockerfile
+    container_name: spark-ai
+    restart: unless-stopped
+    ports:
+      - '8000:8000'
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,63 @@
+# ── Build stage ──────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+COPY packages/api/package.json packages/api/
+COPY packages/shared/package.json packages/shared/
+
+# Install all dependencies (including dev for build)
+RUN npm ci --ignore-scripts
+
+# Copy source
+COPY packages/api/ packages/api/
+COPY packages/shared/ packages/shared/
+COPY tsconfig.json ./
+
+# Build shared package
+RUN cd packages/shared && npx tsc
+
+# ── Production stage ────────────────────────────────────────────
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S spark && \
+    adduser -S spark -u 1001
+
+# Copy package files
+COPY package.json package-lock.json ./
+COPY packages/api/package.json packages/api/
+COPY packages/shared/package.json packages/shared/
+
+# Install production dependencies only
+RUN npm ci --ignore-scripts --omit=dev
+
+# Copy built shared package
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+
+# Copy API source
+COPY packages/api/src ./packages/api/src
+
+# Create uploads directory (persistent volume mount point)
+RUN mkdir -p /data/uploads && chown spark:spark /data/uploads
+
+# Switch to non-root user
+USER spark
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
+# Start API
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "--import", "tsx", "packages/api/src/index.ts"]

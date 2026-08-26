@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    width: 1080px; height: 1920px; 
+    background: #0A0A0A; 
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+  }
+  
+  /* Status bar */
+  .status-bar {
+    height: 88px; padding: 40px 48px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    color: #8A8A8E; font-size: 28px;
+  }
+  
+  /* Header */
+  .header {
+    padding: 20px 48px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo { font-size: 48px; font-weight: 800; color: #00E676; }
+  .header-icons { display: flex; gap: 24px; }
+  .header-icon { 
+    width: 80px; height: 80px; border-radius: 50%; 
+    background: #161618; display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: #8A8A8E;
+  }
+  
+  /* Profile card */
+  .card-container { 
+    padding: 40px 48px; display: flex; justify-content: center;
+  }
+  .card {
+    width: 960px; height: 1200px; border-radius: 40px;
+    background: #161618; border: 2px solid #1E1E22;
+    overflow: hidden; position: relative;
+  }
+  .card-photo {
+    height: 720px; 
+    background: linear-gradient(135deg, #1B3A2A 0%, #0D2818 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .card-photo::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+    background: linear-gradient(transparent, #161618);
+  }
+  .avatar { font-size: 180px; }
+  
+  .card-info { padding: 40px 48px; }
+  .card-name { font-size: 52px; font-weight: 700; color: #F0F0F0; }
+  .card-detail { font-size: 28px; color: #8A8A8E; margin-top: 8px; }
+  
+  .compatibility-badge {
+    position: absolute; top: 680px; left: 48px;
+    background: #00E676; color: #0A0A0A;
+    padding: 12px 28px; border-radius: 24px;
+    font-size: 28px; font-weight: 800;
+  }
+  
+  /* Interest tags */
+  .tags { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  .tag {
+    padding: 10px 20px; border-radius: 20px;
+    background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2);
+    color: #00E676; font-size: 24px;
+  }
+  
+  /* Action buttons */
+  .actions {
+    position: absolute; bottom: 60px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 40px;
+  }
+  .action-btn {
+    width: 120px; height: 120px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .action-nope { background: rgba(255,82,82,0.15); }
+  .action-super { background: rgba(124,77,255,0.15); }
+  .action-like { background: rgba(0,230,118,0.15); }
+  
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 180px; background: #111113;
+    border-top: 1px solid #1E1E22;
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 0 96px;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .nav-icon { font-size: 40px; color: #5A5A5E; }
+  .nav-icon.active { color: #00E676; }
+  .nav-label { font-size: 20px; color: #5A5A5E; }
+  .nav-label.active { color: #00E676; }
+</style>
+</head>
+<body>
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>⚡ 100%</span>
+  </div>
+  
+  <div class="header">
+    <div class="logo">⚡ Spark</div>
+    <div class="header-icons">
+      <div class="header-icon">🔔</div>
+      <div class="header-icon">⚙️</div>
+    </div>
+  </div>
+  
+  <div class="card-container">
+    <div class="card">
+      <div class="card-photo">
+        <span class="avatar">👤</span>
+      </div>
+      <div class="compatibility-badge">94% match</div>
+      <div class="card-info">
+        <div class="card-name">Sarah, 26</div>
+        <div class="card-detail">2 miles away • Product Designer</div>
+        <div class="tags">
+          <span class="tag">Hiking</span>
+          <span class="tag">Coffee</span>
+          <span class="tag">Dogs</span>
+          <span class="tag">Photography</span>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="action-btn action-nope">✕</div>
+        <div class="action-btn action-super">⭐</div>
+        <div class="action-btn action-like">💚</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <span class="nav-icon active">🔥</span>
+      <span class="nav-label active">Discover</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Messages</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profile</span>
+    </div>
+  </div>
+</body>
+</html>

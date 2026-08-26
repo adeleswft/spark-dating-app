@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A0A0A"/>
+      <stop offset="40%" style="stop-color:#0D1F15"/>
+      <stop offset="100%" style="stop-color:#0A0A0A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00E676"/>
+      <stop offset="100%" style="stop-color:#00C853"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7C4DFF"/>
+      <stop offset="100%" style="stop-color:#651FFF"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="150" cy="250" r="180" fill="#00E676" opacity="0.05"/>
+  <circle cx="874" cy="250" r="180" fill="#7C4DFF" opacity="0.05"/>
+  
+  <!-- Lightning bolt icon -->
+  <g transform="translate(80, 140)" filter="url(#glow)">
+    <rect width="120" height="120" rx="30" fill="url(#accent)"/>
+    <path d="M75 30 L50 70 L65 70 L55 110 L85 60 L70 60 Z" fill="#0A0A0A" stroke-width="2"/>
+  </g>
+  
+  <!-- Main text -->
+  <text x="240" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#F0F0F0" letter-spacing="-2">
+    Stop swiping.
+  </text>
+  <text x="240" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#F0F0F0" letter-spacing="-2">
+    Start <tspan fill="url(#accent)">connecting</tspan>.
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="240" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#8A8A8E">
+    AI-Powered Dating App
+  </text>
+  
+  <!-- Stats -->
+  <g transform="translate(240, 380)">
+    <text font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#5A5A5E">
+      <tspan fill="#00E676" font-weight="700">94%</tspan> compatibility  •  
+      <tspan fill="#7C4DFF" font-weight="700">5</tspan> dimensions  •  
+      <tspan fill="#FFD600" font-weight="700">AI</tspan> powered
+    </text>
+  </g>
+  
+  <!-- Phone mockup (right side) -->
+  <g transform="translate(680, 60)">
+    <!-- Phone frame -->
+    <rect width="260" height="380" rx="30" fill="#161618" stroke="#2A2A2A" stroke-width="2"/>
+    <rect x="10" y="10" width="240" height="360" rx="20" fill="#111113"/>
+    
+    <!-- Profile card -->
+    <rect x="30" y="40" width="200" height="160" rx="15" fill="#1E1E22"/>
+    <rect x="30" y="40" width="200" height="120" rx="15" fill="linear-gradient(135deg, #1B3A2A, #0D2818)">
+      <animate attributeName="fill" values="#1B3A2A;#2A1B3A;#1B3A2A" dur="4s" repeatCount="indefinite"/>
+    </rect>
+    <text x="130" y="110" font-family="system-ui, -apple-system, sans-serif" font-size="36" fill="#8A8A8E" text-anchor="middle">👤</text>
+    <text x="130" y="185" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#F0F0F0" text-anchor="middle">Sarah, 26</text>
+    <text x="130" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#8A8A8E" text-anchor="middle">2 miles away</text>
+    
+    <!-- Compatibility badge -->
+    <rect x="90" y="220" width="80" height="30" rx="15" fill="url(#accent)"/>
+    <text x="130" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#0A0A0A" text-anchor="middle">94% match</text>
+    
+    <!-- Action buttons -->
+    <circle cx="65" cy="310" r="25" fill="#FF5252" opacity="0.2"/>
+    <text x="65" y="316" font-family="system-ui, -apple-system, sans-serif" font-size="20" text-anchor="middle">✕</text>
+    
+    <circle cx="130" cy="310" r="25" fill="#7C4DFF" opacity="0.2"/>
+    <text x="130" y="316" font-family="system-ui, -apple-system, sans-serif" font-size="20" text-anchor="middle">⭐</text>
+    
+    <circle cx="195" cy="310" r="25" fill="#00E676" opacity="0.2"/>
+    <text x="195" y="316" font-family="system-ui, -apple-system, sans-serif" font-size="20" text-anchor="middle">💚</text>
+  </g>
+  
+  <!-- Bottom bar -->
+  <rect x="0" y="480" width="1024" height="20" fill="url(#accent)" opacity="0.3"/>
+</svg>

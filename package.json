@@ -24,6 +24,10 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/shared",
+    "packages/api",
+    "packages/eslint-config",
+    "packages/typescript-config",
+    "packages/ui"
   ]
 }

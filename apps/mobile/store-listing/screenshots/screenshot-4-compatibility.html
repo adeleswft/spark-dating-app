@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    width: 1080px; height: 1920px; 
+    background: #0A0A0A; 
+    font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden; display: flex; flex-direction: column; align-items: center;
+  }
+  
+  .status-bar {
+    width: 100%; height: 88px; padding: 40px 48px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    color: #8A8A8E; font-size: 28px;
+  }
+  
+  .back { padding: 20px 48px; width: 100%; }
+  .back-text { font-size: 32px; color: #8A8A8E; }
+  
+  .profiles {
+    display: flex; gap: 40px; align-items: center; margin: 40px 0;
+  }
+  .profile-mini {
+    width: 160px; height: 160px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+  }
+  .profile-mini.a { background: linear-gradient(135deg, #1B3A2A, #0D2818); }
+  .profile-mini.b { background: linear-gradient(135deg, #2A1B3A, #180D28); }
+  
+  .score-circle {
+    width: 300px; height: 300px; border-radius: 50%;
+    border: 8px solid #00E676; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; margin: 40px 0;
+    background: rgba(0,230,118,0.05);
+  }
+  .score-number { font-size: 100px; font-weight: 800; color: #00E676; }
+  .score-label { font-size: 28px; color: #8A8A8E; }
+  
+  .dimensions { width: 900px; margin: 40px 0; }
+  .dimension {
+    display: flex; align-items: center; gap: 24px;
+    padding: 28px 0; border-bottom: 1px solid #1E1E22;
+  }
+  .dim-icon { font-size: 40px; width: 60px; }
+  .dim-info { flex: 1; }
+  .dim-name { font-size: 28px; font-weight: 600; color: #F0F0F0; }
+  .dim-desc { font-size: 22px; color: #5A5A5E; margin-top: 4px; }
+  .dim-bar-container { width: 300px; height: 8px; background: #1E1E22; border-radius: 4px; }
+  .dim-bar { height: 100%; border-radius: 4px; }
+  .dim-score { font-size: 28px; font-weight: 700; width: 80px; text-align: right; }
+  
+  .bar-green { background: #00E676; }
+  .bar-purple { background: #7C4DFF; }
+  .bar-yellow { background: #FFD600; }
+  .bar-red { background: #FF5252; }
+  .bar-teal { background: #00BFA5; }
+  
+  .score-green { color: #00E676; }
+  .score-purple { color: #7C4DFF; }
+  .score-yellow { color: #FFD600; }
+  .score-red { color: #FF5252; }
+  .score-teal { color: #00BFA5; }
+  
+  .ai-insight {
+    margin: 40px 48px; padding: 32px; background: #161618;
+    border: 1px solid #1E1E22; border-radius: 24px;
+  }
+  .ai-insight-title {
+    font-size: 24px; color: #7C4DFF; font-weight: 600; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ai-insight-text { font-size: 26px; color: #8A8A8E; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>⚡ 100%</span>
+  </div>
+  
+  <div class="back">
+    <span class="back-text">← Back</span>
+  </div>
+  
+  <div class="profiles">
+    <div class="profile-mini a">👤</div>
+    <span style="font-size: 48px; color: #00E676;">💚</span>
+    <div class="profile-mini b">👤</div>
+  </div>
+  
+  <div class="score-circle">
+    <div class="score-number">94</div>
+    <div class="score-label">% Match</div>
+  </div>
+  
+  <div class="dimensions">
+    <div class="dimension">
+      <span class="dim-icon">🎯</span>
+      <div class="dim-info">
+        <div class="dim-name">Interests</div>
+        <div class="dim-desc">Hiking, Coffee, Dogs, Photography</div>
+      </div>
+      <div class="dim-bar-container"><div class="dim-bar bar-green" style="width: 92%"></div></div>
+      <div class="dim-score score-green">92%</div>
+    </div>
+    
+    <div class="dimension">
+      <span class="dim-icon">🏠</span>
+      <div class="dim-info">
+        <div class="dim-name">Lifestyle</div>
+        <div class="dim-desc">Active, Outdoors, Morning person</div>
+      </div>
+      <div class="dim-bar-container"><div class="dim-bar bar-purple" style="width: 88%"></div></div>
+      <div class="dim-score score-purple">88%</div>
+    </div>
+    
+    <div class="dimension">
+      <span class="dim-icon">💎</span>
+      <div class="dim-info">
+        <div class="dim-name">Values</div>
+        <div class="dim-desc">Honesty, Adventure, Growth</div>
+      </div>
+      <div class="dim-bar-container"><div class="dim-bar bar-yellow" style="width: 95%"></div></div>
+      <div class="dim-score score-yellow">95%</div>
+    </div>
+    
+    <div class="dimension">
+      <span class="dim-icon">📍</span>
+      <div class="dim-info">
+        <div class="dim-name">Location</div>
+        <div class="dim-desc">2 miles apart</div>
+      </div>
+      <div class="dim-bar-container"><div class="dim-bar bar-teal" style="width: 98%"></div></div>
+      <div class="dim-score score-teal">98%</div>
+    </div>
+    
+    <div class="dimension">
+      <span class="dim-icon">💬</span>
+      <div class="dim-info">
+        <div class="dim-name">Communication</div>
+        <div class="dim-desc">Both prefer deep conversations</div>
+      </div>
+      <div class="dim-bar-container"><div class="dim-bar bar-red" style="width: 85%"></div></div>
+      <div class="dim-score score-red">85%</div>
+    </div>
+  </div>
+  
+  <div class="ai-insight">
+    <div class="ai-insight-title">✨ AI Insight</div>
+    <div class="ai-insight-text">
+      You and Sarah share a passion for outdoor activities and morning routines. Your values around adventure and personal growth align strongly. The AI predicts high long-term compatibility based on communication style matching.
+    </div>
+  </div>
+</body>
+</html>

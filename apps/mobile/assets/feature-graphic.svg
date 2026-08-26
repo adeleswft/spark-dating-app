@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <rect width="1024" height="500" fill="#0A0A0A"/>
+  <circle cx="512" cy="230" r="100" fill="#00E676"/>
+  <text x="512" y="325" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="40" font-weight="bold">⚡</text>
+  <text x="512" y="400" text-anchor="middle" fill="#00E676" font-family="Arial, sans-serif" font-size="30" font-weight="bold">SPARK</text>
+</svg>

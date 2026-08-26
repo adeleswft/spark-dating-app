@@ -1,0 +1,19 @@
+{
+  "name": "@spark/ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload",
+    "build": "python -m py_compile src/main.py",
+    "start": "uvicorn src.main:app"
+  },
+  "dependencies": {
+    "fastapi": "^0.115.0",
+    "uvicorn": "^0.32.0",
+    "openai": "^1.50.0",
+    "scikit-learn": "^1.5.0",
+    "numpy": "^1.26.0",
+    "pydantic": "^2.9.0",
+    "python-dotenv": "^1.0.0"
+  }
+}
