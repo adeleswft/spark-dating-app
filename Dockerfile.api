@@ -57,7 +57,7 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Start API (seed database on first run, then start server)
+# Start API (push schema, seed database, then start server)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "npx tsx packages/api/src/seed.ts && node --import tsx packages/api/src/index.ts"]
+CMD ["sh", "-c", "npx drizzle-kit push --force && npx tsx packages/api/src/seed.ts && node --import tsx packages/api/src/index.ts"]
 # Wed Aug 26 07:55:58 PDT 2026
