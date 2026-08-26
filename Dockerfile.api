@@ -60,3 +60,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 # Start API (seed database on first run, then start server)
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["sh", "-c", "npx tsx packages/api/src/seed.ts && node --import tsx packages/api/src/index.ts"]
+# Wed Aug 26 07:55:58 PDT 2026
