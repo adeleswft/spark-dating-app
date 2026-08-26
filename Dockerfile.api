@@ -57,6 +57,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Start API
+# Start API (seed database on first run, then start server)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "--import", "tsx", "packages/api/src/index.ts"]
+CMD ["sh", "-c", "npx tsx packages/api/src/seed.ts && node --import tsx packages/api/src/index.ts"]
