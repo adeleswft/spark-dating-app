@@ -14,7 +14,6 @@ RUN npm ci --ignore-scripts
 # Copy source
 COPY packages/api/ packages/api/
 COPY packages/shared/ packages/shared/
-COPY tsconfig.json ./
 
 # Build shared package
 RUN cd packages/shared && npx tsc
