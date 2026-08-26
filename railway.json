@@ -3,7 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile.api",
-    "watchPatterns": ["packages/api/**"]
+    "watchPatterns": ["packages/api/**", "packages/shared/**", "Dockerfile.api", "package.json", "package-lock.json", "tsconfig.json"]
   },
   "deploy": {
     "startCommand": "node --import tsx packages/api/src/index.ts",
