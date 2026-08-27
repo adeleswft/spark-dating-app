@@ -115,8 +115,8 @@ app.use('/upload/*', authMiddleware);
 app.use('/upload', authMiddleware);
 app.route('/upload', uploadRoutes);
 
-// Serve uploaded files — require authentication
-app.use('/uploads/*', authMiddleware);
+// Serve uploaded files — PUBLIC (needed for profile photos in discovery feed)
+// Security: path traversal protection + filename sanitization
 app.get('/uploads/*', async (c) => {
   const { join, normalize } = await import('path');
   const { readFile, stat } = await import('fs/promises');

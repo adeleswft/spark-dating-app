@@ -129,18 +129,23 @@ profileRoutes.post('/', async (c) => {
     return true;
   }).slice(0, 20); // Limit to 20 after filtering
 
-  // Fetch interests for each profile
-  const profilesWithInterests = await Promise.all(
-    visibleProfiles.map(async (profile) => {
-      const interests = await db.query.userInterests.findMany({
-        where: eq(userInterests.userId, profile.id),
-      });
-      return {
-        ...profile,
-        interests: interests.map((i) => i.interest),
-      };
-    })
-  );
+  // Batch-fetch interests for all visible profiles (avoid N+1 queries)
+  const allProfileInterests = visibleProfiles.length > 0
+    ? await db.query.userInterests.findMany({
+        where: inArray(userInterests.userId, visibleProfiles.map((p) => p.id)),
+      })
+    : [];
+  const interestsByUser = new Map<string, string[]>();
+  for (const pi of allProfileInterests) {
+    const arr = interestsByUser.get(pi.userId) || [];
+    arr.push(pi.interest);
+    interestsByUser.set(pi.userId, arr);
+  }
+
+  const profilesWithInterests = visibleProfiles.map((profile) => ({
+    ...profile,
+    interests: interestsByUser.get(profile.id) || [],
+  }));
 
   // Get current user for AI scoring
   const currentUser = await db.query.users.findFirst({
@@ -243,7 +248,7 @@ profileRoutes.post('/photos', async (c) => {
   const { writeFile, mkdir } = await import('fs/promises');
   const { join } = await import('path');
 
-  const UPLOAD_DIR = join(process.cwd(), 'uploads');
+  const UPLOAD_DIR = process.env.UPLOAD_DIR || join(process.cwd(), 'uploads');
   await mkdir(UPLOAD_DIR, { recursive: true });
 
   const ext = photo.name?.split('.').pop() || 'jpg';

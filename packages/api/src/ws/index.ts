@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { messages, matches } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
+import { moderateMessage } from '../services/moderation';
 
 const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'spark-dev-secret-key');
 
@@ -152,6 +153,17 @@ async function handleMessage(ws: AuthenticatedSocket, msg: WsMessage) {
       if (!match || (match.userAId !== ws.userId && match.userBId !== ws.userId)) {
         ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }));
         return;
+      }
+
+      // Content moderation (same as HTTP route)
+      try {
+        const mod = await moderateMessage(content.trim());
+        if (mod.severity === 'critical') {
+          ws.send(JSON.stringify({ type: 'error', message: 'Message blocked by safety filters' }));
+          return;
+        }
+      } catch {
+        // If moderation service is down, allow the message
       }
 
       // Save message to DB

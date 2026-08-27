@@ -203,17 +203,27 @@ stripeRoutes.get('/portal', async (c: any) => {
   const userId = c.get('userId');
   const baseUrl = process.env.APP_URL || 'https://spark.dating';
 
-  const status = await getSubscriptionStatus(userId);
-
-  if (!status.subscriptionId) {
-    return c.json({ error: 'No active subscription' }, 404);
+  // Check Stripe is configured
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    return c.json({ url: `${baseUrl}/subscription/manage`, message: 'Billing portal — configure STRIPE_SECRET_KEY to enable' });
   }
 
-  const stripe = (await import('stripe')).default;
-  // In production, create a portal session
-  // For now, return a mock URL
-  return c.json({
-    url: `${baseUrl}/subscription/manage`,
-    message: 'Billing portal — configure STRIPE_SECRET_KEY to enable',
+  const Stripe = (await import('stripe')).default;
+  const stripe = new Stripe(key, { apiVersion: '2024-12-18.acacia' as any });
+
+  // Find the Stripe customer for this user
+  const customers = await stripe.customers.list({ limit: 100 });
+  const customer = customers.data.find((c) => c.metadata?.userId === userId);
+
+  if (!customer) {
+    return c.json({ error: 'No billing account found' }, 404);
+  }
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: customer.id,
+    return_url: `${baseUrl}/subscription/manage`,
   });
+
+  return c.json({ url: session.url });
 });
