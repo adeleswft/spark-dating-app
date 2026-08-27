@@ -35,15 +35,29 @@ COPY package.json package-lock.json ./
 COPY packages/api/package.json packages/api/
 COPY packages/shared/package.json packages/shared/
 
-# Install production dependencies only (tsx + drizzle-kit are in root deps)
+# Install production dependencies only (includes tsx + drizzle-kit at root)
 RUN npm ci --ignore-scripts --omit=dev
 
 # Copy built shared package
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
-# Copy API source
+# Copy API source and config
 COPY packages/api/src ./packages/api/src
 COPY packages/api/drizzle.config.ts ./packages/api/drizzle.config.ts
+
+# Create startup script
+RUN printf '#!/bin/sh\n\
+set -e\n\
+echo "🔍 Pushing database schema..."\n\
+cd /app/packages/api\n\
+npx drizzle-kit push --force 2>&1 || echo "⚠️  Schema push had warnings"\n\
+echo "🌱 Seeding database..."\n\
+npx tsx ./src/seed.ts 2>&1 || echo "⚠️  Seed had warnings"\n\
+echo "🚀 Starting Spark API..."\n\
+cd /app\n\
+exec npx tsx packages/api/src/index.ts\n' > /app/startup.sh && \
+chmod +x /app/startup.sh && \
+chown spark:spark /app/startup.sh
 
 # Create uploads directory (persistent volume mount point)
 RUN mkdir -p /data/uploads && chown spark:spark /data/uploads
@@ -54,10 +68,10 @@ USER spark
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Health check — generous start period for first boot (schema push + seed + tsx compile)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Start API (tsx is in root node_modules, resolvable by Node)
+# Start API
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "cd packages/api && npx drizzle-kit push --force 2>&1 && npx tsx ./src/seed.ts 2>&1; cd /app && exec node --import tsx packages/api/src/index.ts"]
+CMD ["sh", "/app/startup.sh"]
