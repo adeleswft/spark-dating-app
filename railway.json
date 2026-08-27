@@ -3,15 +3,9 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile.api",
-    "watchPatterns": ["packages/api/**", "packages/shared/**", "Dockerfile.api", "package.json", "package-lock.json", "tsconfig.json"]
+    "watchPatterns": ["packages/api/**", "packages/shared/**", "Dockerfile.api", "package.json", "package-lock.json"]
   },
-  "deploy": {
-    "startCommand": "node --import tsx packages/api/src/index.ts",
-    "healthcheckPath": "/health",
-    "healthcheckTimeout": 60,
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
-  },
+
   "variables": {
     "UPLOAD_DIR": "/data/uploads"
   }

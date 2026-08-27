@@ -38,11 +38,15 @@ COPY packages/shared/package.json packages/shared/
 # Install production dependencies only
 RUN npm ci --ignore-scripts --omit=dev
 
+# Install tsx and drizzle-kit globally (needed for schema push + seed at startup)
+RUN npm install -g tsx drizzle-kit
+
 # Copy built shared package
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
-# Copy API source
+# Copy API source and config
 COPY packages/api/src ./packages/api/src
+COPY packages/api/drizzle.config.ts ./packages/api/drizzle.config.ts
 
 # Create uploads directory (persistent volume mount point)
 RUN mkdir -p /data/uploads && chown spark:spark /data/uploads
@@ -54,10 +58,10 @@ USER spark
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Start API
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "npx drizzle-kit push --force 2>&1; npx tsx packages/api/src/seed.ts 2>&1; exec node --import tsx packages/api/src/index.ts"]
-# Wed Aug 26 07:55:58 PDT 2026
+CMD ["sh", "-c", "cd packages/api && npx drizzle-kit push --force 2>&1 && npx tsx packages/api/src/seed.ts 2>&1; cd /app && exec node --import tsx packages/api/src/index.ts"]
+# Cache bust: fix tsx/drizzle-kit install + schema push + seed + healthcheck 2026-08-27
