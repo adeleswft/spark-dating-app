@@ -212,9 +212,18 @@ stripeRoutes.get('/portal', async (c: any) => {
   const Stripe = (await import('stripe')).default;
   const stripe = new Stripe(key, { apiVersion: '2024-12-18.acacia' as any });
 
-  // Find the Stripe customer for this user
-  const customers = await stripe.customers.list({ limit: 100 });
-  const customer = customers.data.find((c) => c.metadata?.userId === userId);
+  // Find the Stripe customer for this user via metadata search
+  let customer: any = null;
+  try {
+    const sr = await stripe.customers.search({
+      query: `metadata[\"userId\":\"${userId}\"]`,
+      limit: 1,
+    });
+    customer = sr.data[0] || null;
+  } catch {
+    const customers = await stripe.customers.list({ limit: 100 });
+    customer = customers.data.find((c) => c.metadata?.userId === userId) || null;
+  }
 
   if (!customer) {
     return c.json({ error: 'No billing account found' }, 404);

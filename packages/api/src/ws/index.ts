@@ -8,7 +8,7 @@ import { IncomingMessage } from 'http';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { messages, matches } from '../db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, ne, sql } from 'drizzle-orm';
 import { moderateMessage } from '../services/moderation';
 
 const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'spark-dev-secret-key');
@@ -207,7 +207,10 @@ async function handleMessage(ws: AuthenticatedSocket, msg: WsMessage) {
         where: eq(matches.id, tid),
       });
 
-      if (!match) return;
+      if (!match || (match.userAId !== ws.userId && match.userBId !== ws.userId)) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }));
+        return;
+      }
 
       const otherUserId =
         match.userAId === ws.userId ? match.userBId : match.userAId;
@@ -237,7 +240,6 @@ async function handleMessage(ws: AuthenticatedSocket, msg: WsMessage) {
       }
 
       // Mark messages from OTHER users as read (not your own)
-      const { ne, sql } = await import('drizzle-orm');
       await db
         .update(messages)
         .set({ readAt: new Date() })

@@ -49,7 +49,7 @@ uploadRoutes.post('/photo', async (c) => {
     await writeFile(filepath, buffer);
 
     // Return the URL
-    const baseUrl = process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
+    const baseUrl = process.env.API_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : `http://localhost:${process.env.PORT || 3001}`);
     const photoUrl = `${baseUrl}/uploads/${filename}`;
 
     return c.json({
@@ -82,7 +82,7 @@ uploadRoutes.post('/photos', async (c) => {
     // Normalize to array
     const fileArray = Array.isArray(files) ? files : [files];
     const results: { url: string; filename: string; error?: string }[] = [];
-    const baseUrl = process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
+    const baseUrl = process.env.API_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : `http://localhost:${process.env.PORT || 3001}`);
 
     for (const file of fileArray) {
       if (typeof file === 'string') {

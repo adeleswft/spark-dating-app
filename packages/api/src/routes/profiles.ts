@@ -259,7 +259,7 @@ profileRoutes.post('/photos', async (c) => {
   const buffer = Buffer.from(arrayBuffer);
   await writeFile(filepath, buffer);
 
-  const baseUrl = process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
+  const baseUrl = process.env.API_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : `http://localhost:${process.env.PORT || 3001}`);
   const photoUrl = `${baseUrl}/uploads/${filename}`;
 
   // Use SQL array append to avoid race condition

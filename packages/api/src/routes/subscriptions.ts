@@ -245,5 +245,5 @@ subscriptionRoutes.delete('/', async (c: any) => {
       and(...conditions),
     );
 
-  return c.json({ message: 'Subscription cancelled. You will retain access until the end of the current billing period.' });
+  return c.json({ message: 'Subscription cancelled. Your premium access has ended.' });
 });

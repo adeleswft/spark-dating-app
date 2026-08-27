@@ -76,6 +76,17 @@ app.use('/matches/*', authMiddleware);
 app.use('/matches', authMiddleware);
 app.use('/messages/*', authMiddleware);
 app.use('/verification/*', authMiddleware);
+// Plans must be public so unauthenticated users can see pricing
+app.get('/subscriptions/plans', async (c) => {
+  const plans = [
+    { id: 'free', name: 'Free', tier: 'free', price: 0, interval: 'month', features: ['10 curated matches per day', 'Basic profile', 'Messaging with matches', 'Standard filters'] },
+    { id: 'plus-monthly', name: 'Spark+', tier: 'plus', price: 5.99, interval: 'month', features: ['Unlimited matches', 'See compatibility scores', 'Advanced filters', '1 weekly boost', '5 Super Sparks per day'] },
+    { id: 'plus-annual', name: 'Spark+', tier: 'plus', price: 50.39, interval: 'year', features: ['Everything in Spark+ Monthly', '30% savings', 'Priority support'] },
+    { id: 'elite-monthly', name: 'Spark Elite', tier: 'elite', price: 10.99, interval: 'month', features: ['Everything in Spark+', 'Priority profile placement', 'Incognito mode', 'AI date planner', 'Message before matching', '3 weekly boosts', 'Unlimited Super Sparks'] },
+    { id: 'elite-annual', name: 'Spark Elite', tier: 'elite', price: 92.39, interval: 'year', features: ['Everything in Spark Elite Monthly', '30% savings', 'VIP support', 'Early access to new features'] },
+  ];
+  return c.json({ plans });
+});
 app.use('/subscriptions/*', authMiddleware);
 app.use('/profile-review/*', authMiddleware);
 app.use('/date-planner/*', authMiddleware);

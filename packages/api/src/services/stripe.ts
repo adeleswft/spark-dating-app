@@ -202,13 +202,19 @@ export async function getSubscriptionStatus(
     };
   }
 
-  // Find customer by userId metadata
-  const customers = await stripe.customers.list({
-    limit: 100,
-  });
-
-  // Find customer by userId in metadata
-  const customer = customers.data.find(c => c.metadata?.userId === userId);
+  // Find customer by userId metadata using search
+  let customer: Stripe.Customer | null = null;
+  try {
+    const searchResult = await stripe.customers.search({
+      query: `metadata[\"userId\":\"${userId}\"]`,
+      limit: 1,
+    });
+    customer = searchResult.data[0] || null;
+  } catch {
+    // Fall back to list if search unavailable
+    const customers = await stripe.customers.list({ limit: 100 });
+    customer = customers.data.find(c => c.metadata?.userId === userId) || null;
+  }
 
   if (!customer) {
     return {
@@ -266,11 +272,17 @@ export async function cancelSubscription(
     return { success: true, message: 'Subscription cancelled (mock mode)' };
   }
 
-  const customers = await stripe.customers.list({
-    limit: 100,
-  });
-
-  const customer = customers.data.find(c => c.metadata?.userId === userId);
+  let customer: Stripe.Customer | null = null;
+  try {
+    const sr = await stripe.customers.search({
+      query: `metadata[\"userId\":\"${userId}\"]`,
+      limit: 1,
+    });
+    customer = sr.data[0] || null;
+  } catch {
+    const customers = await stripe.customers.list({ limit: 100 });
+    customer = customers.data.find(c => c.metadata?.userId === userId) || null;
+  }
   if (!customer) {
     return { success: false, message: 'No Stripe customer found' };
   }
@@ -388,14 +400,20 @@ async function findOrCreateCustomer(
   userId: string,
   email: string,
 ): Promise<Stripe.Customer> {
-  // Search by userId in metadata
-  const existing = await stripe.customers.list({
-    limit: 100,
-  });
-
-  const customer = existing.data.find(c => c.metadata?.userId === userId);
-  if (customer) {
-    return customer;
+  // Use customer metadata search — works at any scale
+  try {
+    const searchResult = await stripe.customers.search({
+      query: `metadata[\"userId\":\"${userId}\"]`,
+      limit: 1,
+    });
+    if (searchResult.data.length > 0) {
+      return searchResult.data[0];
+    }
+  } catch {
+    // Search API not available on all plans — fall back to list
+    const existing = await stripe.customers.list({ limit: 100 });
+    const customer = existing.data.find(c => c.metadata?.userId === userId);
+    if (customer) return customer;
   }
 
   // Create new customer
