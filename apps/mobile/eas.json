@@ -20,7 +20,7 @@
         "resourceClass": "medium"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     },
     "production": {
