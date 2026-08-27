@@ -35,16 +35,13 @@ COPY package.json package-lock.json ./
 COPY packages/api/package.json packages/api/
 COPY packages/shared/package.json packages/shared/
 
-# Install production dependencies only
+# Install production dependencies only (tsx + drizzle-kit are in root deps)
 RUN npm ci --ignore-scripts --omit=dev
-
-# Install tsx and drizzle-kit globally (needed for schema push + seed at startup)
-RUN npm install -g tsx drizzle-kit
 
 # Copy built shared package
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
-# Copy API source and config
+# Copy API source
 COPY packages/api/src ./packages/api/src
 COPY packages/api/drizzle.config.ts ./packages/api/drizzle.config.ts
 
@@ -54,9 +51,6 @@ RUN mkdir -p /data/uploads && chown spark:spark /data/uploads
 # Switch to non-root user
 USER spark
 
-# Make globally installed packages (tsx, drizzle-kit) discoverable
-ENV NODE_PATH=/usr/local/lib/node_modules
-
 # Expose port
 EXPOSE 3000
 
@@ -64,7 +58,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Start API
+# Start API (tsx is in root node_modules, resolvable by Node)
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["sh", "-c", "cd packages/api && npx drizzle-kit push --force 2>&1 && npx tsx packages/api/src/seed.ts 2>&1; cd /app && exec node --import tsx packages/api/src/index.ts"]
-# Cache bust: fix tsx/drizzle-kit install + schema push + seed + healthcheck 2026-08-27
