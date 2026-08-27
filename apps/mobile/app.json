@@ -39,33 +39,7 @@
       ]
     },
     "plugins": [
-      "expo-router",
-      "expo-web-browser",
-      "expo-screen-capture",
-      ["expo-camera",
-        {
-          "cameraPermission": "Spark needs camera access for photo verification and profile photos."
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Spark needs access to your photos for profile pictures."
-        }
-      ],
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Spark uses your location to show you people nearby."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#00E676"
-        }
-      ]
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true
