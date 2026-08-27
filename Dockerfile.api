@@ -45,20 +45,6 @@ COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY packages/api/src ./packages/api/src
 COPY packages/api/drizzle.config.ts ./packages/api/drizzle.config.ts
 
-# Create startup script
-RUN printf '#!/bin/sh\n\
-set -e\n\
-echo "🔍 Pushing database schema..."\n\
-cd /app/packages/api\n\
-npx drizzle-kit push --force 2>&1 || echo "⚠️  Schema push had warnings"\n\
-echo "🌱 Seeding database..."\n\
-npx tsx ./src/seed.ts 2>&1 || echo "⚠️  Seed had warnings"\n\
-echo "🚀 Starting Spark API..."\n\
-cd /app\n\
-exec npx tsx packages/api/src/index.ts\n' > /app/startup.sh && \
-chmod +x /app/startup.sh && \
-chown spark:spark /app/startup.sh
-
 # Create uploads directory (persistent volume mount point)
 RUN mkdir -p /data/uploads && chown spark:spark /data/uploads
 
@@ -72,6 +58,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Start API
+# Start API — push schema, seed if empty, then start server
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "/app/startup.sh"]
+CMD ["sh", "-c", "cd /app/packages/api && npx drizzle-kit push --force 2>/dev/null; npx tsx src/seed.ts 2>&1; cd /app && exec npx tsx packages/api/src/index.ts"]

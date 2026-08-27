@@ -334,7 +334,12 @@ async function seed() {
   console.log('');
 }
 
-seed().catch((err) => {
-  console.error('❌ Seed failed:', err);
-  process.exit(1);
-});
+seed()
+  .then(() => {
+    console.log('\n✅ Done. Exiting.');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('❌ Seed failed:', err);
+    process.exit(1);
+  });
