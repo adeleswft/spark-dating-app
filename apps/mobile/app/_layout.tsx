@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { PaperProvider, MD3DarkTheme } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const theme = {
 
 export default function RootLayout() {
   return (
+    <ErrorBoundary>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <PaperProvider theme={theme}>
@@ -74,5 +76,5 @@ export default function RootLayout() {
         </PaperProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
-  );
+    </ErrorBoundary>);
 }
