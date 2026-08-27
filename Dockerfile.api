@@ -60,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 # Start API (tsx is in root node_modules, resolvable by Node)
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "cd packages/api && npx drizzle-kit push --force 2>&1 && npx tsx packages/api/src/seed.ts 2>&1; cd /app && exec node --import tsx packages/api/src/index.ts"]
+CMD ["sh", "-c", "cd packages/api && npx drizzle-kit push --force 2>&1 && npx tsx ./src/seed.ts 2>&1; cd /app && exec node --import tsx packages/api/src/index.ts"]
