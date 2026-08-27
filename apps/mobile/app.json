@@ -36,13 +36,12 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "WAKE_LOCK"
-      ],
-      "googleServicesFile": "./google-services.json"
+      ]
     },
     "plugins": [
       "expo-router",
-      "expo-auth-session",
-      "expo-web-browser",      "expo-screen-capture",
+      "expo-web-browser",
+      "expo-screen-capture",
       ["expo-camera",
         {
           "cameraPermission": "Spark needs camera access for photo verification and profile photos."
@@ -70,6 +69,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0da67f89-0b1c-44f5-b978-b48bc9ceafb8"
+      }
+    },
+    "owner": "amink12s-team"
   }
 }

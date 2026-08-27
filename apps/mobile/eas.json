@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 12.0.0"
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -27,12 +28,7 @@
         "resourceClass": "medium"
       },
       "android": {
-        "buildType": "app-bundle",
-        "env": {
-          "ANDROID_KEYSTORE_PASSWORD": "",
-          "ANDROID_KEY_ALIAS": "",
-          "ANDROID_KEY_PASSWORD": ""
-        }
+        "buildType": "app-bundle"
       }
     }
   },
