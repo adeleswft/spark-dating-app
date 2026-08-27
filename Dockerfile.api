@@ -54,6 +54,9 @@ RUN mkdir -p /data/uploads && chown spark:spark /data/uploads
 # Switch to non-root user
 USER spark
 
+# Make globally installed packages (tsx, drizzle-kit) discoverable
+ENV NODE_PATH=/usr/local/lib/node_modules
+
 # Expose port
 EXPOSE 3000
 
