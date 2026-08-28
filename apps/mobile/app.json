@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "spark",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -40,15 +40,14 @@
     },
     "plugins": [
       "expo-router",
-      "react-native-mmkv",
-      ["expo-build-properties", {
-        "android": {
-          "kotlinVersion": "1.9.25"
-        },
-        "common": {
-          "kotlinVersion": "1.9.25"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.9.25"
+          }
         }
-      }]
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,14 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { MMKV } from 'react-native-mmkv';
-
-const storage = new MMKV();
-
-const mmkvStorage = {
-  getItem: (name: string) => storage.getString(name) ?? null,
-  setItem: (name: string, value: string) => storage.set(name, value),
-  removeItem: (name: string) => storage.delete(name),
-};
+import { safeStorage } from '../services/storage';
 
 interface OnboardingState {
   // Progress
@@ -126,7 +118,7 @@ export const useOnboardingStore = create<OnboardingState>()(
     }),
     {
       name: 'spark-onboarding',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => safeStorage),
     }
   )
 );

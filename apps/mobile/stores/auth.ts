@@ -1,16 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { MMKV } from 'react-native-mmkv';
+import { safeStorage } from '../services/storage';
 import { api } from '../services/api';
 import { registerForPushNotifications, unregisterPushToken } from '../services/notifications';
-
-const storage = new MMKV();
-
-const mmkvStorage = {
-  getItem: (name: string) => storage.getString(name) ?? null,
-  setItem: (name: string, value: string) => storage.set(name, value),
-  removeItem: (name: string) => storage.delete(name),
-};
 
 interface User {
   id: string;
@@ -99,7 +91,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'spark-auth',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => safeStorage),
       partialize: (state) => ({
         user: state.user,
         token: state.token,

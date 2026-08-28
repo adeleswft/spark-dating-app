@@ -1,17 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { MMKV } from 'react-native-mmkv';
+import { safeStorage } from '../services/storage';
 import type { SubscriptionTier, ConsumableType } from '../services/iapProducts';
 import { getAllProductIds } from '../services/iapProducts';
 import { useAuthStore } from './auth';
-
-const storage = new MMKV();
-
-const mmkvStorage = {
-  getItem: (name: string) => storage.getString(name) ?? null,
-  setItem: (name: string, value: string) => storage.set(name, value),
-  removeItem: (name: string) => storage.delete(name),
-};
 
 // ── Try to load react-native-iap ──────────────────────────────────
 // Falls back to mock mode if the native module isn't available.
@@ -295,7 +287,7 @@ export const useIAPStore = create<IAPState>()(
     }),
     {
       name: 'spark-iap',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => safeStorage),
       partialize: (state) => ({
         tier: state.tier,
         subscriptionExpiresAt: state.subscriptionExpiresAt,
