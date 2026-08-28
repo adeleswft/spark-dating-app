@@ -94,10 +94,14 @@ export function useRealtimeMessages({
           return [...prev, newMessage];
         });
       },
-      (readIds) => {
+(readerUserId) => {
+        // The other user (readerUserId) has read our messages.
+        // Mark messages SENT BY the current user as read.
         setMessages((prev) =>
           prev.map((m) =>
-            readIds.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m
+            m.sender_id === userId && !m.read_at
+              ? { ...m, read_at: new Date().toISOString() }
+              : m
           )
         );
       }

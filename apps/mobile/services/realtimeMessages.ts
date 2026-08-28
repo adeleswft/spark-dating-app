@@ -33,6 +33,8 @@ let ws: WebSocket | null = null;
 let wsToken: string | null = null;
 let wsReconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 let wsMessageHandlers: Array<(data: any) => void> = [];
+// Track active match rooms so we can re-join after reconnect
+let activeMatchIds: Set<string> = new Set();
 
 function getWsUrl(token: string): string {
   const httpUrl = new URL(API_URL);
@@ -41,7 +43,12 @@ function getWsUrl(token: string): string {
 }
 
 export function connectWebSocket(token: string) {
-  if (ws && ws.readyState === WebSocket.OPEN && wsToken === token) return;
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) && wsToken === token) return;
+
+  // Close any existing connection first
+  if (ws) {
+    try { ws.close(); } catch {}
+  }
 
   wsToken = token;
   ws = new WebSocket(getWsUrl(token));
@@ -51,6 +58,13 @@ export function connectWebSocket(token: string) {
       const data = JSON.parse(event.data);
       wsMessageHandlers.forEach((h) => h(data));
     } catch {}
+  };
+
+  ws.onopen = () => {
+    // Re-join all active match rooms after reconnect
+    activeMatchIds.forEach((matchId) => {
+      sendWsMessage({ type: 'join', matchId });
+    });
   };
 
   ws.onclose = () => {
@@ -69,6 +83,7 @@ export function connectWebSocket(token: string) {
 export function disconnectWebSocket() {
   if (wsReconnectTimeout) clearTimeout(wsReconnectTimeout);
   wsToken = null;
+  activeMatchIds.clear();
   ws?.close();
   ws = null;
 }
@@ -90,8 +105,11 @@ function addWsHandler(handler: (data: any) => void) {
 export function subscribeToMessages(
   matchId: string,
   onMessage: (message: Message) => void,
-  onRead?: (messageIds: string[]) => void
+  onRead?: (readerUserId: string) => void
 ): () => void {
+  // Track this match room for re-join after reconnect
+  activeMatchIds.add(matchId);
+
   // Join the match room
   sendWsMessage({ type: 'join', matchId });
 
@@ -107,12 +125,13 @@ export function subscribeToMessages(
       });
     }
     if (data.type === 'read' && data.matchId === matchId && onRead) {
-      onRead([]); // Signal that read state changed
+      onRead(data.userId); // The user who marked as read
     }
   });
 
   return () => {
     removeHandler();
+    activeMatchIds.delete(matchId);
   };
 }
 
