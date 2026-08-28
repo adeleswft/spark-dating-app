@@ -1,16 +1,28 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { useAuthStore } from '../stores/auth';
 
+// Lazy-load expo-notifications to avoid crash on web
+let Notifications: any = null;
+const isNative = Platform.OS !== 'web';
+try {
+  if (isNative) {
+    Notifications = require('expo-notifications');
+  }
+} catch {
+  // Web or unsupported platform — Notifications stays null
+}
+
 // Configure notification behavior (wrapped in try/catch for safety)
 try {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
+  if (Notifications?.setNotificationHandler) {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  }
 } catch (e) {
   console.warn('[Notifications] Failed to set handler:', e);
 }
@@ -22,65 +34,74 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
  * Returns the Expo push token string.
  */
 export async function registerForPushNotifications(): Promise<string | null> {
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+  if (!Notifications) return null;
 
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
+  try {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-  if (finalStatus !== 'granted') {
-    console.log('Push notification permission not granted');
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      console.log('Push notification permission not granted');
+      return null;
+    }
+
+    const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'your-project-id';
+    const { data: pushToken } = await Notifications.getExpoPushTokenAsync({ projectId });
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('matches', {
+        name: 'New Matches',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#E84855',
+      });
+
+      await Notifications.setNotificationChannelAsync('messages', {
+        name: 'Messages',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250],
+      });
+    }
+
+    // Send token to server if user is authenticated
+    try {
+      const { token: authToken } = useAuthStore.getState();
+      if (authToken && pushToken) {
+        await fetch(`${API_URL}/notifications/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            token: pushToken,
+            platform: Platform.OS as 'ios' | 'android',
+          }),
+        });
+        console.log('[Push] Token registered with server');
+      }
+    } catch (err) {
+      console.log('[Push] Failed to register token with server:', err);
+    }
+
+    return pushToken;
+  } catch (err) {
+    console.warn('[Notifications] registerForPushNotifications failed:', err);
     return null;
   }
-
-  const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'your-project-id';
-  const { data: pushToken } = await Notifications.getExpoPushTokenAsync({ projectId });
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('matches', {
-      name: 'New Matches',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#00E676',
-    });
-
-    await Notifications.setNotificationChannelAsync('messages', {
-      name: 'Messages',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250],
-    });
-  }
-
-  // Send token to server if user is authenticated
-  try {
-    const { token: authToken } = useAuthStore.getState();
-    if (authToken && pushToken) {
-      await fetch(`${API_URL}/notifications/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          token: pushToken,
-          platform: Platform.OS as 'ios' | 'android',
-        }),
-      });
-      console.log('[Push] Token registered with server');
-    }
-  } catch (err) {
-    console.log('[Push] Failed to register token with server:', err);
-  }
-
-  return pushToken;
 }
 
 /**
  * Unregister push token from server (call on logout).
  */
 export async function unregisterPushToken(): Promise<void> {
+  if (!Notifications) return;
+
   try {
     const { token: authToken } = useAuthStore.getState();
     const storedToken = await Notifications.getExpoPushTokenAsync({
@@ -107,8 +128,9 @@ export async function unregisterPushToken(): Promise<void> {
  * Returns a subscription that can be removed with .remove().
  */
 export function addNotificationReceivedListener(
-  handler: (notification: Notifications.Notification) => void,
+  handler: (notification: any) => void,
 ) {
+  if (!Notifications) return { remove: () => {} };
   return Notifications.addNotificationReceivedListener(handler);
 }
 
@@ -117,8 +139,9 @@ export function addNotificationReceivedListener(
  * Returns a subscription that can be removed with .remove().
  */
 export function addNotificationResponseListener(
-  handler: (response: Notifications.NotificationResponse) => void,
+  handler: (response: any) => void,
 ) {
+  if (!Notifications) return { remove: () => {} };
   return Notifications.addNotificationResponseReceivedListener(handler);
 }
 
@@ -126,8 +149,13 @@ export function addNotificationResponseListener(
  * Clear all notifications
  */
 export async function clearAllNotifications() {
-  await Notifications.dismissAllNotificationsAsync();
-  await Notifications.setBadgeCountAsync(0);
+  if (!Notifications) return;
+  try {
+    await Notifications.dismissAllNotificationsAsync();
+    await Notifications.setBadgeCountAsync(0);
+  } catch {
+    // ignore on web
+  }
 }
 
 /**
@@ -138,10 +166,15 @@ export async function scheduleLocalNotification(
   body: string,
   data?: Record<string, any>,
 ) {
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, data: data || {}, sound: true },
-    trigger: null,
-  });
+  if (!Notifications) return;
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, data: data || {}, sound: true },
+      trigger: null,
+    });
+  } catch {
+    // ignore on web
+  }
 }
 
 // ─── Convenience helpers used by useNotifications hook ──────────

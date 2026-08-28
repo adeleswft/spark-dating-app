@@ -52,10 +52,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0A', padding: 24, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#0D0B0E', padding: 24, paddingTop: 60 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#FF5252', marginBottom: 12 },
-  message: { fontSize: 16, color: '#FFFFFF', marginBottom: 16 },
-  stack: { flex: 1, backgroundColor: '#141414', borderRadius: 8, padding: 12, marginBottom: 16 },
-  stackText: { fontSize: 11, color: '#A0A0A0', fontFamily: 'monospace' },
-  button: { backgroundColor: '#00E676', borderRadius: 30 },
+  message: { fontSize: 16, color: '#F5EDE3', marginBottom: 16 },
+  stack: { flex: 1, backgroundColor: '#1A1620', borderRadius: 8, padding: 12, marginBottom: 16 },
+  stackText: { fontSize: 11, color: '#8A7F92', fontFamily: 'monospace' },
+  button: { backgroundColor: '#E84855', borderRadius: 30 },
 });

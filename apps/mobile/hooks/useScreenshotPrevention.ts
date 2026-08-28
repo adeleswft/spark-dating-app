@@ -1,58 +1,12 @@
 /**
- * Hook that prevents screenshots and screen recording.
- *
- * Uses expo-screen-capture to activate/deactivate screenshot blocking
- * when a screen mounts/unmounts. Shows a native warning when the user
- * attempts to capture the screen.
- *
- * Usage:
- *   useScreenshotPrevention();                    // block on mount
- *   useScreenshotPrevention(true);                // explicitly block
- *   useScreenshotPrevention(false);               // explicitly allow
+ * No-op web version — screenshot prevention is a native-only feature.
  */
-import { useEffect, useRef } from 'react';
-import * as ScreenCapture from 'expo-screen-capture';
+import { useEffect } from 'react';
 
-export function useScreenshotPrevention(prevent: boolean = true) {
-  const isPreventing = useRef(false);
-
-  useEffect(() => {
-    if (prevent && !isPreventing.current) {
-      isPreventing.current = true;
-      ScreenCapture.preventScreenCaptureAsync().catch(() => {
-        // Some platforms may not support this
-      });
-    }
-
-    return () => {
-      if (isPreventing.current) {
-        isPreventing.current = false;
-        ScreenCapture.allowScreenCaptureAsync().catch(() => {});
-      }
-    };
-  }, [prevent]);
+export function useScreenshotPrevention(_prevent: boolean = true) {
+  // No-op on web
 }
 
-/**
- * Listen for screenshot attempts (Android only).
- * Returns the listener subscription for cleanup.
- *
- * Usage:
- *   useScreenshotListener((event) => {
- *     Alert.alert('Screenshot Detected', 'Screenshots are not allowed.');
- *   });
- */
-export function useScreenshotListener(
-  onCapture?: () => void,
-) {
-  useEffect(() => {
-    if (!onCapture) return;
-
-    const subscription = ScreenCapture.addScreenshotListener(() => {
-      onCapture();
-    });
-    return () => {
-      subscription.remove();
-    };
-  }, [onCapture]);
+export function useScreenshotListener(_onCapture?: () => void) {
+  // No-op on web
 }
