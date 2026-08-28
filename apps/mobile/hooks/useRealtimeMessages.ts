@@ -1,14 +1,15 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '../services/supabase';
 import {
   subscribeToMessages,
   sendMessage as sendMsg,
   markMessagesRead,
   fetchMessages,
   createTypingChannel,
+  connectWebSocket,
   Message,
   TypingEvent,
 } from '../services/realtimeMessages';
+import { useAuthStore } from '../stores/auth';
 
 interface UseRealtimeMessagesOptions {
   matchId: string;
@@ -40,6 +41,12 @@ export function useRealtimeMessages({
   const [hasMore, setHasMore] = useState(true);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof createTypingChannel> | null>(null);
+  const token = useAuthStore((s) => s.token);
+
+  // Connect WebSocket when token is available
+  useEffect(() => {
+    if (token) connectWebSocket(token);
+  }, [token]);
 
   // Fetch initial messages
   useEffect(() => {
@@ -139,21 +146,9 @@ export function useRealtimeMessages({
     if (!hasMore || loading || !matchId) return;
 
     try {
-      const oldestMessage = messages[0];
-      if (!oldestMessage) return;
-
-      const { data, error: fetchError } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('match_id', matchId)
-        .lt('created_at', oldestMessage.created_at)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (fetchError) throw fetchError;
-
-      if (data && data.length > 0) {
-        setMessages((prev) => [...data.reverse(), ...prev]);
+      const data = await fetchMessages(matchId, 50);
+      if (data.length > 0) {
+        setMessages((prev) => [...data, ...prev]);
         setHasMore(data.length >= 50);
       } else {
         setHasMore(false);
@@ -161,7 +156,7 @@ export function useRealtimeMessages({
     } catch (err) {
       console.error('Error loading more messages:', err);
     }
-  }, [hasMore, loading, messages, matchId]);
+  }, [hasMore, loading, matchId]);
 
   const markAsRead = useCallback(async () => {
     if (!matchId || !userId) return;

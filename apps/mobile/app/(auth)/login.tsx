@@ -12,7 +12,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/discover');
     }
   }, [isAuthenticated]);
 
@@ -30,7 +30,7 @@ export default function LoginScreen() {
     }
     const success = await login(email.trim(), password.trim());
     if (success) {
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/discover');
     }
   };
 

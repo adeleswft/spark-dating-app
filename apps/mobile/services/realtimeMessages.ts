@@ -1,5 +1,10 @@
-import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import { supabase } from './supabase';
+/**
+ * Messaging service using the Spark API + WebSocket.
+ * Replaces the Supabase-only implementation with one that works
+ * with the deployed API at EXPO_PUBLIC_API_URL.
+ */
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Types
 export interface Message {
@@ -23,48 +28,95 @@ export interface TypingEvent {
   is_typing: boolean;
 }
 
-// Message subscription
+// ── WebSocket connection manager ──────────────────────────────────
+let ws: WebSocket | null = null;
+let wsToken: string | null = null;
+let wsReconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+let wsMessageHandlers: Array<(data: any) => void> = [];
+
+function getWsUrl(token: string): string {
+  const httpUrl = new URL(API_URL);
+  const protocol = httpUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${httpUrl.host}/ws?token=${token}`;
+}
+
+export function connectWebSocket(token: string) {
+  if (ws && ws.readyState === WebSocket.OPEN && wsToken === token) return;
+
+  wsToken = token;
+  ws = new WebSocket(getWsUrl(token));
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      wsMessageHandlers.forEach((h) => h(data));
+    } catch {}
+  };
+
+  ws.onclose = () => {
+    // Reconnect after 3s
+    if (wsReconnectTimeout) clearTimeout(wsReconnectTimeout);
+    wsReconnectTimeout = setTimeout(() => {
+      if (wsToken) connectWebSocket(wsToken);
+    }, 3000);
+  };
+
+  ws.onerror = () => {
+    ws?.close();
+  };
+}
+
+export function disconnectWebSocket() {
+  if (wsReconnectTimeout) clearTimeout(wsReconnectTimeout);
+  wsToken = null;
+  ws?.close();
+  ws = null;
+}
+
+function sendWsMessage(data: any) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(data));
+  }
+}
+
+function addWsHandler(handler: (data: any) => void) {
+  wsMessageHandlers.push(handler);
+  return () => {
+    wsMessageHandlers = wsMessageHandlers.filter((h) => h !== handler);
+  };
+}
+
+// ── Message subscription via WebSocket ────────────────────────────
 export function subscribeToMessages(
   matchId: string,
   onMessage: (message: Message) => void,
   onRead?: (messageIds: string[]) => void
 ): () => void {
-  const channel = supabase
-    .channel(`messages:${matchId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `match_id=eq.${matchId}`,
-      },
-      (payload: { new: Message }) => {
-        onMessage(payload.new);
-      }
-    )
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'messages',
-        filter: `match_id=eq.${matchId}`,
-      },
-      (payload: { new: Message }) => {
-        if (payload.new.read_at && onRead) {
-          onRead([payload.new.id]);
-        }
-      }
-    )
-    .subscribe();
+  // Join the match room
+  sendWsMessage({ type: 'join', matchId });
+
+  const removeHandler = addWsHandler((data) => {
+    if (data.type === 'message' && data.message?.matchId === matchId) {
+      onMessage({
+        id: data.message.id,
+        match_id: data.message.matchId,
+        sender_id: data.message.senderId,
+        content: data.message.content,
+        created_at: data.message.createdAt,
+        read_at: null,
+      });
+    }
+    if (data.type === 'read' && data.matchId === matchId && onRead) {
+      onRead([]); // Signal that read state changed
+    }
+  });
 
   return () => {
-    supabase.removeChannel(channel);
+    removeHandler();
   };
 }
 
-// Typing indicator broadcast
+// ── Typing indicator via WebSocket ────────────────────────────────
 export function createTypingChannel(
   matchId: string,
   userId: string
@@ -73,155 +125,130 @@ export function createTypingChannel(
   onTyping: (callback: (event: TypingEvent) => void) => () => void;
   cleanup: () => void;
 } {
-  const channel = supabase.channel(`typing:${matchId}`);
+  const typingCallbacks: Array<(event: TypingEvent) => void> = [];
 
-  const sendTyping = (isTyping: boolean) => {
-    channel.send({
-      type: 'broadcast',
-      event: 'typing',
-      payload: {
-        user_id: userId,
-        match_id: matchId,
-        is_typing: isTyping,
-      } as TypingEvent,
-    });
-  };
-
-  const onTyping = (callback: (event: TypingEvent) => void) => {
-    const subscription = channel
-      .on('broadcast', { event: 'typing' }, ({ payload }) => {
-        const event = payload as TypingEvent;
-        if (event.user_id !== userId) {
-          callback(event);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  };
+  const removeHandler = addWsHandler((data) => {
+    if (data.type === 'typing' && data.matchId === matchId) {
+      const event: TypingEvent = {
+        user_id: data.userId,
+        match_id: data.matchId,
+        is_typing: data.isTyping,
+      };
+      typingCallbacks.forEach((cb) => cb(event));
+    }
+  });
 
   return {
-    sendTyping,
-    onTyping,
+    sendTyping: (isTyping: boolean) => {
+      sendWsMessage({ type: 'typing', matchId, isTyping });
+    },
+    onTyping: (callback: (event: TypingEvent) => void) => {
+      typingCallbacks.push(callback);
+      return () => {
+        const idx = typingCallbacks.indexOf(callback);
+        if (idx >= 0) typingCallbacks.splice(idx, 1);
+      };
+    },
     cleanup: () => {
-      supabase.removeChannel(channel);
+      removeHandler();
+      typingCallbacks.length = 0;
     },
   };
 }
 
-// Send a message
+// ── Send a message via API ────────────────────────────────────────
 export async function sendMessage(
   matchId: string,
   senderId: string,
   content: string
 ): Promise<Message | null> {
-  const { data, error } = await supabase
-    .from('messages')
-    .insert({
-      match_id: matchId,
-      sender_id: senderId,
-      content,
-    })
-    .select()
-    .single();
+  try {
+    // Try WebSocket first (real-time)
+    sendWsMessage({ type: 'message', matchId, content });
 
-  if (error) {
-    console.error('Error sending message:', error);
+    // Also send via API for persistence (WS handler saves to DB too,
+    // but this ensures delivery if WS is disconnected)
+    // We skip the HTTP call if WS is open — the WS handler saves to DB
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      // WS handler saves to DB and broadcasts. Return a synthetic message
+      // The actual DB message will arrive via the WS broadcast
+      return {
+        id: `pending-${Date.now()}`,
+        match_id: matchId,
+        sender_id: senderId,
+        content,
+        created_at: new Date().toISOString(),
+        read_at: null,
+      };
+    }
+
+    // Fallback: HTTP API
+    const token = wsToken;
+    const res = await fetch(`${API_URL}/messages/${matchId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.message || null;
+  } catch {
     return null;
   }
-
-  return data;
 }
 
-// Mark messages as read
+// ── Mark messages as read via WS ─────────────────────────────────
 export async function markMessagesRead(
   matchId: string,
   userId: string
 ): Promise<void> {
-  const { error } = await supabase
-    .from('messages')
-    .update({ read_at: new Date().toISOString() })
-    .eq('match_id', matchId)
-    .neq('sender_id', userId)
-    .is('read_at', null);
-
-  if (error) {
-    console.error('Error marking messages as read:', error);
-  }
+  sendWsMessage({ type: 'read', matchId });
 }
 
-// Fetch messages for a match
+// ── Fetch messages via API ────────────────────────────────────────
 export async function fetchMessages(
   matchId: string,
   limit = 50
 ): Promise<Message[]> {
-  const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('match_id', matchId)
-    .order('created_at', { ascending: true })
-    .limit(limit);
-
-  if (error) {
-    console.error('Error fetching messages:', error);
-    return [];
-  }
-
-  return data || [];
-}
-
-// Presence tracking
-export function trackPresence(userId: string, username: string): () => void {
-  // Track presence on a global channel so all subscribers can see it
-  const channel = supabase.channel('online-users', {
-    config: {
-      presence: {
-        key: userId,
-      },
-    },
-  });
-
-  channel
-    .on('presence', { event: 'sync' }, () => {
-      // Presence state available via channel.presenceState()
-    })
-    .subscribe((status: string) => {
-      if (status === 'SUBSCRIBED') {
-        channel.track({
-          user_id: userId,
-          online_at: new Date().toISOString(),
-          username,
-        });
-      }
+  try {
+    const token = wsToken;
+    const res = await fetch(`${API_URL}/messages/${matchId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 
-  return () => {
-    supabase.removeChannel(channel);
-  };
+    if (!res.ok) return [];
+    const data = await res.json();
+
+    return (data.messages || []).map((m: any) => ({
+      id: m.id,
+      match_id: m.matchId,
+      sender_id: m.senderId,
+      content: m.content,
+      created_at: m.createdAt,
+      read_at: m.readAt,
+    }));
+  } catch {
+    return [];
+  }
 }
 
-// Subscribe to presence of a specific match
+// ── Presence: simplified (no Supabase presence) ──────────────────
+export function trackPresence(userId: string, username: string): () => void {
+  // Presence is tracked via WebSocket connections
+  // No-op for now — the server tracks active connections
+  return () => {};
+}
+
 export function subscribeToMatchPresence(
   matchId: string,
   otherUserId: string,
   onStatusChange: (isOnline: boolean, lastSeen?: string) => void
 ): () => void {
-  // Subscribe to the global online-users channel where all users track their presence
-  const channel = supabase.channel('online-users');
-
-  channel
-    .on('presence', { event: 'sync' }, () => {
-      const state = channel.presenceState() as Record<string, unknown[]>;
-      const users = state[otherUserId] as PresenceState[] | undefined;
-      const isOnline = !!users && users.length > 0;
-      const lastSeen = users?.[0]?.online_at;
-      onStatusChange(isOnline, lastSeen);
-    })
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-  };
+  // simplified — no Supabase presence
+  onStatusChange(false);
+  return () => {};
 }

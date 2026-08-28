@@ -64,7 +64,7 @@ export default function CompleteScreen() {
   const handleStart = async () => {
     await syncToAPI();
     completeOnboarding();
-    router.replace('/(tabs)');
+    router.replace('/(tabs)/discover');
   };
 
   return (

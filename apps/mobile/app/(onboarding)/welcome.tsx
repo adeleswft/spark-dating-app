@@ -52,7 +52,7 @@ export default function WelcomeScreen() {
         </Button>
         <Button
           mode="text"
-          onPress={() => router.push('/(tabs)')}
+          onPress={() => router.push('/(tabs)/discover')}
           textColor="#A0A0A0"
         >
           Skip for now
