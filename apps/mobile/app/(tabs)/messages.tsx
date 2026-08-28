@@ -29,7 +29,7 @@ const SAMPLE_CONVERSATIONS: Conversation[] = [
 ];
 
 function OnlineDot({ isOnline, size = 12 }: { isOnline: boolean; size?: number }) {
-  return <View style={[styles.onlineDot, { width: size, height: size, borderRadius: size / 2, backgroundColor: isOnline ? '#00E676' : '#333', borderWidth: 2, borderColor: '#141414' }]} />;
+  return <View style={[styles.onlineDot, { width: size, height: size, borderRadius: size / 2, backgroundColor: isOnline ? '#E84855' : '#3D3545', borderWidth: 2, borderColor: '#1A1620' }]} />;
 }
 
 function TypingIndicator() {
@@ -50,7 +50,7 @@ function ReadReceipt({ readAt, isMine }: { readAt: string | null; isMine: boolea
   if (!isMine) return null;
   return (
     <View style={styles.readReceipt}>
-      <MaterialCommunityIcons name={readAt ? 'check-all' : 'check'} size={14} color={readAt ? '#00E676' : '#555'} />
+      <MaterialCommunityIcons name={readAt ? 'check-all' : 'check'} size={14} color={readAt ? '#D4A574' : '#5A5060'} />
     </View>
   );
 }
@@ -87,18 +87,18 @@ function ConversationItem({ conversation, onPress, isOnline }: { conversation: C
           <Text variant="titleMedium" style={styles.conversationName}>{conversation.name}</Text>
           {isNewMatch ? (
             <View style={styles.newMatchBadge}>
-              <MaterialCommunityIcons name="fire" size={12} color="#000" />
+              <MaterialCommunityIcons name="fire" size={11} color="#FFF" />
               <Text style={styles.newMatchBadgeText}>NEW</Text>
             </View>
           ) : (
             <View style={styles.scoreBadge}>
-              <MaterialCommunityIcons name="star" size={12} color="#00E676" />
+              <MaterialCommunityIcons name="star" size={11} color="#D4A574" />
               <Text style={styles.scoreText}>{conversation.compatibilityScore}%</Text>
             </View>
           )}
         </View>
         <Text variant="bodySmall" style={[styles.lastMessage, isNewMatch && styles.lastMessageNew]} numberOfLines={1}>
-          {isNewMatch ? 'Send the first message! 👋' : conversation.lastMessage || 'No messages yet'}
+          {isNewMatch ? 'Say something special ✨' : conversation.lastMessage || 'No messages yet'}
         </Text>
       </View>
       {conversation.unread > 0 && (
@@ -127,7 +127,6 @@ function MessageBubble({ message, isMine }: { message: MessageType; isMine: bool
 
 export default function MessagesScreen() {
   const { user, token } = useAuthStore();
-  // Prevent screenshots while viewing conversations/messages
   useScreenshotPrevention();
   const [conversations, setConversations] = useState<Conversation[]>(SAMPLE_CONVERSATIONS);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -142,21 +141,16 @@ export default function MessagesScreen() {
   const { messages, loading, sendMessage, loadMore, hasMore, otherUserTyping, markAsRead, sendTyping } = useRealtimeMessages({ matchId: selectedConversation?.id || '', userId: currentUserId, enabled: !!selectedConversation });
   const { isOnline } = useOnlineStatus({ userId: currentUserId, username: user?.name || 'You', otherUserId: selectedConversation?.otherUserId || '', matchId: selectedConversation?.id || '' });
 
-  // Sort conversations: unread first, then by date
   const sortedConversations = [...conversations].sort((a, b) => {
-    // New matches (no messages) first
     const aIsNew = a.isNew && !a.lastMessage;
     const bIsNew = b.isNew && !b.lastMessage;
     if (aIsNew && !bIsNew) return -1;
     if (!aIsNew && bIsNew) return 1;
-    // Then by unread count
     if (a.unread > 0 && b.unread === 0) return -1;
     if (a.unread === 0 && b.unread > 0) return 1;
-    // Then by date
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  // Fetch conversations from API
   const fetchConversations = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/matches/conversations`, {
@@ -169,15 +163,13 @@ export default function MessagesScreen() {
         }
       }
     } catch {
-      // API unreachable — use sample data
+      // API unreachable
     } finally {
       setLoadingConversations(false);
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
+  useEffect(() => { fetchConversations(); }, [fetchConversations]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -188,11 +180,8 @@ export default function MessagesScreen() {
   useEffect(() => { if (messages.length > 0) setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100); }, [messages.length]);
   useEffect(() => { if (selectedConversation) markAsRead(); }, [selectedConversation, messages.length]);
 
-  // Clean up typing timeout on unmount
   useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    };
+    return () => { if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); };
   }, []);
 
   const handleSend = useCallback(async () => {
@@ -218,25 +207,21 @@ export default function MessagesScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text variant="headlineMedium" style={styles.title}>Messages</Text>
-          <Text variant="bodySmall" style={styles.subtitle}>{conversations.length} matches</Text>
+          <Text style={styles.title}>Messages</Text>
+          <Text style={styles.subtitle}>{conversations.length} matches</Text>
         </View>
         <FlatList
           data={sortedConversations}
           renderItem={({ item }) => (
-            <ConversationItem
-              conversation={item}
-              onPress={() => handleConversationSelect(item)}
-              isOnline={false}
-            />
+            <ConversationItem conversation={item} onPress={() => handleConversationSelect(item)} isOnline={false} />
           )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.conversationsList}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#00E676" colors={['#00E676']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#E84855" colors={['#E84855']} />}
           ListEmptyComponent={!loadingConversations ? (
             <View style={styles.emptyState}>
-              <MaterialCommunityIcons name="message-text-outline" size={48} color="#333" />
+              <MaterialCommunityIcons name="message-text-outline" size={48} color="#3D3545" />
               <Text style={styles.emptyStateTitle}>No matches yet</Text>
               <Text style={styles.emptyStateSubtitle}>When you match with someone, you'll see them here</Text>
             </View>
@@ -249,33 +234,33 @@ export default function MessagesScreen() {
   return (
     <KeyboardAvoidingView style={styles.chatContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
       <View style={styles.chatHeader}>
-        <IconButton icon="arrow-left" size={24} onPress={() => setSelectedConversation(null)} style={styles.backButton} iconColor="#FFF" />
+        <IconButton icon="arrow-left" size={24} onPress={() => setSelectedConversation(null)} style={styles.backButton} iconColor="#F5EDE3" />
         <TouchableOpacity style={styles.chatHeaderInfo} onPress={() => {}}>
-          <ConversationAvatar photo={selectedConversation.photo} name={selectedConversation.name} size={40} />
+          <ConversationAvatar photo={selectedConversation.photo} name={selectedConversation.name} size={38} />
           <View style={styles.chatHeaderText}>
             <View style={styles.chatNameRow}>
               <Text variant="titleMedium" style={styles.chatName}>{selectedConversation.name}</Text>
-              <OnlineDot isOnline={isOnline} size={8} />
+              <OnlineDot isOnline={isOnline} size={7} />
             </View>
-            <Text variant="bodySmall" style={[styles.onlineStatus, { color: isOnline ? '#00E676' : '#555' }]}>{isOnline ? 'Online now' : 'Offline'}</Text>
+            <Text variant="bodySmall" style={[styles.onlineStatus, { color: isOnline ? '#E84855' : '#5A5060' }]}>{isOnline ? 'Online now' : 'Offline'}</Text>
           </View>
         </TouchableOpacity>
-        <IconButton icon="phone" size={22} onPress={() => {}} style={styles.headerAction} iconColor="#A0A0A0" />
-        <IconButton icon="video" size={22} onPress={() => {}} style={styles.headerAction} iconColor="#A0A0A0" />
+        <IconButton icon="phone" size={20} onPress={() => {}} style={styles.headerAction} iconColor="#8A7E90" />
+        <IconButton icon="video" size={20} onPress={() => {}} style={styles.headerAction} iconColor="#8A7E90" />
       </View>
 
       <FlatList ref={flatListRef} data={messages} renderItem={({ item }) => <MessageBubble message={item} isMine={item.sender_id === currentUserId} />} keyExtractor={(item) => item.id} contentContainerStyle={styles.messagesList} onRefresh={loadMore} refreshing={loading}
         ListHeaderComponent={hasMore ? <TouchableOpacity style={styles.loadMoreButton} onPress={loadMore}><Text style={styles.loadMoreText}>Load earlier messages</Text></TouchableOpacity> : null}
-        ListEmptyComponent={!loading ? <View style={styles.emptyChat}><Text style={styles.emptyChatText}>Start a conversation with {selectedConversation.name}! 💬</Text></View> : null}
+        ListEmptyComponent={!loading ? <View style={styles.emptyChat}><Text style={styles.emptyChatText}>Start a conversation with {selectedConversation.name} ✨</Text></View> : null}
       />
       {otherUserTyping && <TypingIndicator />}
 
       <View style={styles.inputContainer}>
-        <IconButton icon="camera" size={22} onPress={() => {}} style={styles.inputAction} iconColor="#A0A0A0" />
-        <IconButton icon="image" size={22} onPress={() => {}} style={styles.inputAction} iconColor="#A0A0A0" />
-        <TextInput ref={inputRef} style={styles.textInput} placeholder="Type a message..." placeholderTextColor="#555" value={messageText} onChangeText={handleTextChange} multiline maxLength={2000} />
+        <IconButton icon="camera" size={20} onPress={() => {}} style={styles.inputAction} iconColor="#8A7E90" />
+        <IconButton icon="image" size={20} onPress={() => {}} style={styles.inputAction} iconColor="#8A7E90" />
+        <TextInput ref={inputRef} style={styles.textInput} placeholder="Say something..." placeholderTextColor="#5A5060" value={messageText} onChangeText={handleTextChange} multiline maxLength={2000} />
         <TouchableOpacity style={[styles.sendButton, !messageText.trim() && styles.sendButtonDisabled]} onPress={handleSend} disabled={!messageText.trim()}>
-          <MaterialCommunityIcons name="send" size={20} color={messageText.trim() ? '#000' : '#555'} />
+          <MaterialCommunityIcons name="send" size={18} color={messageText.trim() ? '#FFF' : '#5A5060'} />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -283,70 +268,69 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0A' },
-  header: { paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20, backgroundColor: '#0A0A0A' },
-  title: { fontWeight: 'bold', color: '#FFFFFF' },
-  subtitle: { color: '#555', marginTop: 2 },
+  container: { flex: 1, backgroundColor: '#0D0B0E' },
+  header: { paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20 },
+  title: { fontSize: 26, fontWeight: '800', color: '#F5EDE3', letterSpacing: -0.5 },
+  subtitle: { color: '#5A5060', marginTop: 2, fontSize: 14 },
   conversationsList: { paddingHorizontal: 16, paddingTop: 8 },
-  separator: { height: 1, backgroundColor: '#1C1C1C', marginLeft: 80 },
+  separator: { height: 1, backgroundColor: '#2A2530', marginLeft: 80 },
   conversationItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4 },
-  conversationItemNew: { backgroundColor: 'rgba(0, 230, 118, 0.05)', borderRadius: 12 },
+  conversationItemNew: { backgroundColor: 'rgba(232, 72, 85, 0.06)', borderRadius: 12 },
   avatarContainer: { position: 'relative' },
-  avatarCircle: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#1B3A2A', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
-  avatarImage: { width: 56, height: 56, borderRadius: 28 },
-  avatarLetter: { fontSize: 22, fontWeight: 'bold', color: '#00E676' },
-  onlineDotContainer: { position: 'absolute', backgroundColor: '#141414', borderRadius: 7, padding: 1 },
+  avatarCircle: { width: 54, height: 54, borderRadius: 27, backgroundColor: '#3D1520', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+  avatarImage: { width: 54, height: 54, borderRadius: 27 },
+  avatarLetter: { fontSize: 20, fontWeight: '700', color: '#E84855' },
+  onlineDotContainer: { position: 'absolute', backgroundColor: '#1A1620', borderRadius: 7, padding: 1 },
   onlineDot: {},
   conversationInfo: { flex: 1, marginLeft: 12 },
-  conversationHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  conversationName: { fontWeight: 'bold', color: '#FFFFFF' },
-  scoreBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1B3A2A', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 2 },
-  scoreText: { fontSize: 11, fontWeight: 'bold', color: '#00E676' },
-  lastMessage: { color: '#A0A0A0', marginTop: 4 },
-  lastMessageNew: { color: '#00E676', fontStyle: 'italic' },
-  newMatchBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#00E676', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 2 },
-  newMatchBadgeText: { fontSize: 10, fontWeight: '800', color: '#000', letterSpacing: 0.5 },
-  unreadBadge: { backgroundColor: '#00E676', borderRadius: 12, minWidth: 24, height: 24, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 },
-  unreadText: { color: '#000', fontWeight: 'bold', fontSize: 12 },
-  chatContainer: { flex: 1, backgroundColor: '#0A0A0A' },
-  chatHeader: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 10, paddingHorizontal: 4, backgroundColor: '#141414', borderBottomWidth: 1, borderBottomColor: '#1C1C1C' },
+  conversationHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  conversationName: { fontWeight: '700', color: '#F5EDE3' },
+  scoreBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#3D1520', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 2 },
+  scoreText: { fontSize: 11, fontWeight: '700', color: '#D4A574' },
+  lastMessage: { color: '#8A7E90', marginTop: 3 },
+  lastMessageNew: { color: '#E84855', fontStyle: 'italic' },
+  newMatchBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E84855', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 2 },
+  newMatchBadgeText: { fontSize: 10, fontWeight: '800', color: '#FFF', letterSpacing: 0.5 },
+  unreadBadge: { backgroundColor: '#E84855', borderRadius: 12, minWidth: 24, height: 24, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 },
+  unreadText: { color: '#FFF', fontWeight: 'bold', fontSize: 12 },
+  chatContainer: { flex: 1, backgroundColor: '#0D0B0E' },
+  chatHeader: { flexDirection: 'row', alignItems: 'center', paddingTop: 50, paddingBottom: 10, paddingHorizontal: 4, backgroundColor: '#1A1620', borderBottomWidth: 1, borderBottomColor: '#2A2530' },
   backButton: { margin: 0 },
   chatHeaderInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  chatAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#1B3A2A', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   chatHeaderText: { flex: 1 },
   chatNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  chatName: { fontWeight: 'bold', color: '#FFFFFF' },
-  onlineStatus: { color: '#00E676', fontSize: 12, marginTop: 1 },
+  chatName: { fontWeight: '700', color: '#F5EDE3' },
+  onlineStatus: { color: '#E84855', fontSize: 12, marginTop: 1 },
   headerAction: { margin: 0 },
   messagesList: { paddingHorizontal: 16, paddingVertical: 8, flexGrow: 1 },
   messageRow: { marginBottom: 8 },
   messageRowLeft: { alignItems: 'flex-start' },
   messageRowRight: { alignItems: 'flex-end' },
   messageBubble: { maxWidth: '78%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18 },
-  myMessage: { backgroundColor: '#00E676', borderBottomRightRadius: 4 },
-  otherMessage: { backgroundColor: '#1C1C1C', borderBottomLeftRadius: 4 },
+  myMessage: { backgroundColor: '#E84855', borderBottomRightRadius: 4 },
+  otherMessage: { backgroundColor: '#2A2530', borderBottomLeftRadius: 4 },
   messageText: { fontSize: 15, lineHeight: 20 },
-  myMessageText: { color: '#000' },
-  otherMessageText: { color: '#FFFFFF' },
+  myMessageText: { color: '#FFFFFF' },
+  otherMessageText: { color: '#F5EDE3' },
   messageFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 4 },
-  timestamp: { fontSize: 10, color: 'rgba(255,255,255,0.5)' },
-  timestampMine: { color: 'rgba(0,0,0,0.6)' },
+  timestamp: { fontSize: 10, color: 'rgba(245, 237, 227, 0.4)' },
+  timestampMine: { color: 'rgba(255,255,255,0.6)' },
   readReceipt: { marginLeft: 2 },
   typingContainer: { paddingHorizontal: 20, paddingBottom: 4 },
-  typingBubble: { backgroundColor: '#1C1C1C', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18, borderBottomLeftRadius: 4, alignSelf: 'flex-start' },
+  typingBubble: { backgroundColor: '#2A2530', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18, borderBottomLeftRadius: 4, alignSelf: 'flex-start' },
   typingDotRow: { flexDirection: 'row', gap: 4 },
-  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#555' },
+  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#5A5060' },
   typingDot1: {}, typingDot2: {}, typingDot3: {},
   loadMoreButton: { alignItems: 'center', paddingVertical: 12 },
-  loadMoreText: { color: '#00E676', fontWeight: '500' },
+  loadMoreText: { color: '#E84855', fontWeight: '600' },
   emptyChat: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
-  emptyChatText: { color: '#555', fontSize: 16, textAlign: 'center' },
+  emptyChatText: { color: '#5A5060', fontSize: 16, textAlign: 'center' },
   emptyState: { alignItems: 'center', paddingVertical: 60, gap: 12 },
-  emptyStateTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF' },
-  emptyStateSubtitle: { fontSize: 14, color: '#555', textAlign: 'center', paddingHorizontal: 40 },
-  inputContainer: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 8, paddingBottom: Platform.OS === 'ios' ? 24 : 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#1C1C1C', backgroundColor: '#141414' },
+  emptyStateTitle: { fontSize: 18, fontWeight: '700', color: '#F5EDE3' },
+  emptyStateSubtitle: { fontSize: 14, color: '#5A5060', textAlign: 'center', paddingHorizontal: 40 },
+  inputContainer: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 8, paddingBottom: Platform.OS === 'ios' ? 24 : 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#2A2530', backgroundColor: '#1A1620' },
   inputAction: { margin: 0, marginBottom: 4 },
-  textInput: { flex: 1, backgroundColor: '#1C1C1C', borderRadius: 20, paddingHorizontal: 16, paddingVertical: Platform.OS === 'ios' ? 10 : 8, marginHorizontal: 8, maxHeight: 100, fontSize: 15, color: '#FFF' },
-  sendButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#00E676', justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
-  sendButtonDisabled: { backgroundColor: '#1C1C1C' },
+  textInput: { flex: 1, backgroundColor: '#2A2530', borderRadius: 20, paddingHorizontal: 16, paddingVertical: Platform.OS === 'ios' ? 10 : 8, marginHorizontal: 8, maxHeight: 100, fontSize: 15, color: '#F5EDE3' },
+  sendButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E84855', justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
+  sendButtonDisabled: { backgroundColor: '#2A2530' },
 });

@@ -38,7 +38,6 @@ export default function MatchesScreen() {
         if (res.ok) {
           const data = await res.json();
           if (!cancelled && Array.isArray(data.matches) && data.matches.length > 0) {
-            // Map API format to screen format
             const mapped = data.matches.map((m: any) => ({
               id: m.id,
               name: m.otherUser?.name || 'Unknown',
@@ -67,15 +66,9 @@ export default function MatchesScreen() {
       activeOpacity={0.7}
     >
       <View style={styles.photoContainer}>
-        {item.photo ? (
-          <View style={styles.photoCircle}>
-            <Text style={styles.photoLetter}>{item.name[0]}</Text>
-          </View>
-        ) : (
-          <View style={styles.photoCircle}>
-            <Text style={styles.photoLetter}>{item.name[0]}</Text>
-          </View>
-        )}
+        <View style={styles.photoCircle}>
+          <Text style={styles.photoLetter}>{item.name[0]}</Text>
+        </View>
         {item.isNew && <View style={styles.newBadge} />}
       </View>
       <View style={styles.matchInfo}>
@@ -83,7 +76,7 @@ export default function MatchesScreen() {
         <Text variant="bodySmall" style={styles.lastMessage} numberOfLines={1}>{item.lastMessage}</Text>
       </View>
       <View style={styles.scoreBadge}>
-        <MaterialCommunityIcons name="star" size={14} color="#00E676" />
+        <MaterialCommunityIcons name="star" size={13} color="#D4A574" />
         <Text style={styles.scoreText}>{item.compatibilityScore}%</Text>
       </View>
     </TouchableOpacity>
@@ -92,11 +85,11 @@ export default function MatchesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>Matches</Text>
-        <Text variant="bodyLarge" style={styles.subtitle}>{matches.length} matches</Text>
+        <Text style={styles.title}>Matches</Text>
+        <Text style={styles.subtitle}>{matches.length} connections</Text>
       </View>
       {loading ? (
-        <ActivityIndicator size="large" color="#00E676" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#E84855" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={matches}
@@ -105,9 +98,9 @@ export default function MatchesScreen() {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <MaterialCommunityIcons name="account-group-outline" size={64} color="#333" />
+              <MaterialCommunityIcons name="account-group-outline" size={56} color="#3D3545" />
               <Text style={styles.emptyTitle}>No matches yet</Text>
-              <Text style={styles.emptySubtitle}>Start swiping to find your match!</Text>
+              <Text style={styles.emptySubtitle}>Start swiping to find your connection</Text>
             </View>
           }
         />
@@ -117,22 +110,22 @@ export default function MatchesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0A' },
-  header: { paddingTop: 60, paddingBottom: 16, paddingHorizontal: 20, backgroundColor: '#0A0A0A' },
-  title: { fontWeight: 'bold', color: '#FFFFFF' },
-  subtitle: { color: '#A0A0A0', marginTop: 4 },
+  container: { flex: 1, backgroundColor: '#0D0B0E' },
+  header: { paddingTop: 60, paddingBottom: 16, paddingHorizontal: 20 },
+  title: { fontSize: 26, fontWeight: '800', color: '#F5EDE3', letterSpacing: -0.5 },
+  subtitle: { color: '#8A7E90', marginTop: 4, fontSize: 14 },
   list: { padding: 16 },
-  matchItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#141414', borderRadius: 16, padding: 12, marginBottom: 12 },
+  matchItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2A2530', borderRadius: 16, padding: 12, marginBottom: 10 },
   photoContainer: { position: 'relative' },
-  photoCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#1B3A2A', justifyContent: 'center', alignItems: 'center' },
-  photoLetter: { fontSize: 24, fontWeight: 'bold', color: '#00E676' },
-  newBadge: { position: 'absolute', top: 0, right: 0, width: 16, height: 16, borderRadius: 8, backgroundColor: '#00E676', borderWidth: 2, borderColor: '#141414' },
+  photoCircle: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#3D1520', justifyContent: 'center', alignItems: 'center' },
+  photoLetter: { fontSize: 22, fontWeight: '700', color: '#E84855' },
+  newBadge: { position: 'absolute', top: 0, right: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: '#E84855', borderWidth: 2, borderColor: '#2A2530' },
   matchInfo: { flex: 1, marginLeft: 12 },
-  name: { fontWeight: 'bold', color: '#FFFFFF' },
-  lastMessage: { color: '#A0A0A0', marginTop: 4 },
-  scoreBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1B3A2A', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, gap: 4 },
-  scoreText: { fontSize: 12, fontWeight: 'bold', color: '#00E676' },
+  name: { fontWeight: '700', color: '#F5EDE3' },
+  lastMessage: { color: '#8A7E90', marginTop: 3 },
+  scoreBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#3D1520', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, gap: 3 },
+  scoreText: { fontSize: 12, fontWeight: '700', color: '#D4A574' },
   emptyState: { alignItems: 'center', marginTop: 60 },
-  emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF', marginTop: 16 },
-  emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 8 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#F5EDE3', marginTop: 16 },
+  emptySubtitle: { fontSize: 14, color: '#8A7E90', marginTop: 8 },
 });

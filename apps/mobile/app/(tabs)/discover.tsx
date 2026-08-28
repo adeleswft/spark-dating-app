@@ -59,7 +59,7 @@ export default function DiscoverScreen() {
           const data = await res.json();
           if (!cancelled && Array.isArray(data.profiles) && data.profiles.length > 0) {
             setProfiles(data.profiles);
-            setCurrentIndex(0); // Reset index when new profiles are loaded
+            setCurrentIndex(0);
           }
         }
       } catch {
@@ -174,53 +174,64 @@ export default function DiscoverScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.logo}>🔥 Spark</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.brandMark}>🔥</Text>
+          <Text style={styles.logo}>Spark</Text>
+        </View>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.notificationBell} onPress={() => router.push('/notifications')} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="bell-outline" size={24} color="#A0A0A0" />
+            <MaterialCommunityIcons name="bell-outline" size={22} color="#8A7E90" />
             {unreadCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
               </View>
             )}
           </TouchableOpacity>
-          <Surface style={styles.remainingBadge} elevation={0}>
-            <MaterialCommunityIcons name="fire" size={16} color="#00E676" />
+          <View style={styles.remainingBadge}>
+            <MaterialCommunityIcons name="fire" size={14} color="#E84855" />
             <Text style={styles.remainingText}>{remainingCount}</Text>
-          </Surface>
+          </View>
         </View>
       </View>
 
-      <View style={styles.cardStack}>
-        {loading ? (
-          <View style={styles.emptyState}>
-            <ActivityIndicator size="large" color="#00E676" />
-            <Text style={[styles.emptyTitle, { marginTop: 16 }]}>Finding your matches...</Text>
-          </View>
-        ) : hasProfiles ? (
-          visibleProfiles.slice().reverse().map((profile, reversedIndex) => {
-            const stackIndex = visibleProfiles.length - 1 - reversedIndex;
-            const isFirst = stackIndex === 0;
-            return (
-              <SwipeCard key={profile.id} ref={(ref) => { if (isFirst) cardRefs.current[0] = ref; }} profile={profile} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight} onTap={() => setSelectedProfile(profile)} isFirst={isFirst} stackIndex={stackIndex} />
-            );
-          })
-        ) : (
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="fire-off" size={64} color="#333" />
-            <Text variant="headlineSmall" style={styles.emptyTitle}>No more profiles!</Text>
-            <Text variant="bodyLarge" style={styles.emptySubtitle}>You've seen everyone nearby. Check back later for new matches!</Text>
-          </View>
-        )}
+      <View style={styles.cardArea}>
+        {/* Signature warm glow behind cards */}
+        <View style={styles.glowContainer}>
+          <View style={styles.glowOuter} />
+          <View style={styles.glowInner} />
+        </View>
+
+        <View style={styles.cardStack}>
+          {loading ? (
+            <View style={styles.emptyState}>
+              <ActivityIndicator size="large" color="#E84855" />
+              <Text style={[styles.emptyTitle, { marginTop: 16 }]}>Finding your matches...</Text>
+            </View>
+          ) : hasProfiles ? (
+            visibleProfiles.slice().reverse().map((profile, reversedIndex) => {
+              const stackIndex = visibleProfiles.length - 1 - reversedIndex;
+              const isFirst = stackIndex === 0;
+              return (
+                <SwipeCard key={profile.id} ref={(ref) => { if (isFirst) cardRefs.current[0] = ref; }} profile={profile} onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight} onTap={() => setSelectedProfile(profile)} isFirst={isFirst} stackIndex={stackIndex} />
+              );
+            })
+          ) : (
+            <View style={styles.emptyState}>
+              <MaterialCommunityIcons name="fire-off" size={56} color="#3D3545" />
+              <Text style={styles.emptyTitle}>No more profiles!</Text>
+              <Text style={styles.emptySubtitle}>You've seen everyone nearby. Check back later for new matches!</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {hasProfiles && (
         <View style={styles.actions}>
-          <IconButton icon="undo" size={22} iconColor={canRewind ? '#00E676' : '#555'} style={[styles.actionButton, styles.undoButton]} onPress={handleUndo} disabled={!canRewind} />
-          <IconButton icon="close" size={32} iconColor="#FF5252" style={[styles.actionButton, styles.passButton]} onPress={() => handleButtonSwipe('left')} />
-          <IconButton icon="star" size={26} iconColor="#7C4DFF" style={[styles.actionButton, styles.superButton]} onPress={handleSuperSpark} />
-          <IconButton icon="heart" size={32} iconColor="#00E676" style={[styles.actionButton, styles.likeButton]} onPress={() => handleButtonSwipe('right')} />
-          <IconButton icon="lightning-bolt" size={22} iconColor="#FFD600" style={[styles.actionButton, styles.boostButton]} onPress={() => setShowBoost(true)} />
+          <IconButton icon="undo" size={20} iconColor={canRewind ? '#D4A574' : '#3D3545'} style={[styles.actionButton, styles.undoButton]} onPress={handleUndo} disabled={!canRewind} />
+          <IconButton icon="close" size={30} iconColor="#E84855" style={[styles.actionButton, styles.passButton]} onPress={() => handleButtonSwipe('left')} />
+          <IconButton icon="star" size={24} iconColor="#6C3A8A" style={[styles.actionButton, styles.superButton]} onPress={handleSuperSpark} />
+          <IconButton icon="heart" size={30} iconColor="#E84855" style={[styles.actionButton, styles.likeButton]} onPress={() => handleButtonSwipe('right')} />
+          <IconButton icon="lightning-bolt" size={20} iconColor="#D4A574" style={[styles.actionButton, styles.boostButton]} onPress={() => setShowBoost(true)} />
         </View>
       )}
 
@@ -236,24 +247,30 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0A' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20, backgroundColor: '#0A0A0A' },
-  logo: { fontWeight: 'bold', color: '#00E676' },
+  container: { flex: 1, backgroundColor: '#0D0B0E' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 56, paddingBottom: 12, paddingHorizontal: 20 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  brandMark: { fontSize: 20 },
+  logo: { fontSize: 22, fontWeight: '800', color: '#E84855', letterSpacing: -0.3 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  notificationBell: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1C1C1C', position: 'relative' },
-  notificationBadge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#00E676', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
-  notificationBadgeText: { color: '#000', fontSize: 10, fontWeight: 'bold' },
-  remainingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1C1C1C', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 16, gap: 4 },
-  remainingText: { fontWeight: 'bold', color: '#00E676', fontSize: 14 },
-  cardStack: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 16 },
-  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 12, paddingBottom: 32, gap: 12 },
-  actionButton: { backgroundColor: '#1C1C1C', elevation: 0 },
+  notificationBell: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1620', position: 'relative' },
+  notificationBadge: { position: 'absolute', top: 2, right: 2, backgroundColor: '#E84855', borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4 },
+  notificationBadgeText: { color: '#FFF', fontSize: 10, fontWeight: 'bold' },
+  remainingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1A1620', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14, gap: 4 },
+  remainingText: { fontWeight: '700', color: '#E84855', fontSize: 13 },
+  cardArea: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
+  glowContainer: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' },
+  glowOuter: { width: 320, height: 380, borderRadius: 160, backgroundColor: 'rgba(232, 72, 85, 0.05)', position: 'absolute' },
+  glowInner: { width: 220, height: 280, borderRadius: 120, backgroundColor: 'rgba(232, 72, 85, 0.04)', position: 'absolute' },
+  cardStack: { width: SCREEN_WIDTH - 40, alignItems: 'center', justifyContent: 'center' },
+  actions: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 10, paddingBottom: 28, gap: 14 },
+  actionButton: { backgroundColor: '#1A1620', elevation: 0 },
   undoButton: { width: 44, height: 44, borderRadius: 22, margin: 0 },
-  passButton: { width: 64, height: 64, borderRadius: 32, margin: 0 },
-  superButton: { width: 52, height: 52, borderRadius: 26, margin: 0 },
-  likeButton: { width: 64, height: 64, borderRadius: 32, margin: 0 },
+  passButton: { width: 62, height: 62, borderRadius: 31, margin: 0, borderWidth: 2, borderColor: '#E8485530' },
+  superButton: { width: 50, height: 50, borderRadius: 25, margin: 0, borderWidth: 2, borderColor: '#6C3A8A30' },
+  likeButton: { width: 62, height: 62, borderRadius: 31, margin: 0, borderWidth: 2, borderColor: '#E8485530' },
   boostButton: { width: 44, height: 44, borderRadius: 22, margin: 0 },
   emptyState: { alignItems: 'center', padding: 24 },
-  emptyTitle: { marginTop: 16, fontWeight: 'bold', color: '#FFF' },
-  emptySubtitle: { marginTop: 8, color: '#A0A0A0', textAlign: 'center' },
+  emptyTitle: { marginTop: 16, fontWeight: '700', color: '#F5EDE3', fontSize: 18 },
+  emptySubtitle: { marginTop: 8, color: '#8A7E90', textAlign: 'center', fontSize: 14, lineHeight: 20 },
 });
