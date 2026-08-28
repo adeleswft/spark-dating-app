@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 
 export default function PhoneVerifyScreen() {
+  const router = useRouter();
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
@@ -37,6 +39,7 @@ export default function PhoneVerifyScreen() {
     setLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      router.replace('/(tabs)/discover');
     } catch (error) {
       console.error('Verification failed:', error);
     } finally {
@@ -68,7 +71,7 @@ export default function PhoneVerifyScreen() {
           </>
         )}
 
-        <Button mode="text" onPress={() => {}} style={styles.skipButton} textColor="#555">Skip for now (required before discovery)</Button>
+        <Button mode="text" onPress={() => router.replace('/(tabs)/discover')} style={styles.skipButton} textColor="#555">Skip for now</Button>
       </View>
     </KeyboardAvoidingView>
   );

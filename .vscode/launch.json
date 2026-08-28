@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Start API Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "args": ["--import", "tsx", "packages/api/src/index.ts"],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": [],
+      "preLaunchTask": ""
+    },
+    {
+      "name": "Start Expo Dev Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "args": ["node_modules/expo/bin/cli", "start", "--port", "8081"],
+      "cwd": "${workspaceFolder}/apps/mobile",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Start AI Service",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/ai-service/main.py",
+      "cwd": "${workspaceFolder}/services/ai-service",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (API + Mobile)",
+      "configurations": ["Start API Server", "Start Expo Dev Server"]
+    }
+  ]
+}

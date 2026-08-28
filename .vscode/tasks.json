@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "TypeScript Check (Mobile)",
+      "type": "shell",
+      "command": "npx tsc --noEmit",
+      "options": { "cwd": "${workspaceFolder}/apps/mobile" },
+      "problemMatcher": ["$tsc"],
+      "group": "build"
+    },
+    {
+      "label": "TypeScript Check (API)",
+      "type": "shell",
+      "command": "npx tsc --noEmit",
+      "options": { "cwd": "${workspaceFolder}/packages/api" },
+      "problemMatcher": ["$tsc"],
+      "group": "build"
+    },
+    {
+      "label": "Run API Tests",
+      "type": "shell",
+      "command": "for t in src/__tests__/upload-security.test.ts src/__tests__/bugfix-verify.test.ts src/__tests__/adversarial-verify.test.ts; do echo \"=== $(basename $t) ===\" && node --import tsx \"$t\"; done",
+      "options": { "cwd": "${workspaceFolder}/packages/api" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Android Bundle",
+      "type": "shell",
+      "command": "npx expo export --platform android",
+      "options": { "cwd": "${workspaceFolder}/apps/mobile" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start API + Mobile",
+      "type": "shell",
+      "command": "echo 'Run via Run & Debug (F5) → Full Stack'",
+      "problemMatcher": []
+    },
+    {
+      "label": "Git Push",
+      "type": "shell",
+      "command": "git add -A && git commit -m \"${input:commitMessage}\" && git push",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "commitMessage",
+      "type": "promptString",
+      "description": "Commit message"
+    }
+  ]
+}

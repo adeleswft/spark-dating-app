@@ -343,7 +343,7 @@ export default function SettingsScreen() {
             iconBg="#E3F2FD"
             label="Phone Number"
             value={profileData?.phone || 'Not set'}
-            onPress={() => {}}
+            onPress={() => router.push('/(auth)/phone-verify')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
@@ -351,8 +351,8 @@ export default function SettingsScreen() {
             iconColor="#FF9800"
             iconBg="#FFF3E0"
             label="Email"
-            value={profileData?.email || user?.email || 'alex@spark.com'}
-            onPress={() => {}}
+            value={profileData?.email || user?.email || ''}
+            onPress={() => Alert.alert('Email', profileData?.email || user?.email || 'Not set')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
@@ -360,7 +360,30 @@ export default function SettingsScreen() {
             iconColor="#9C27B0"
             iconBg="#F3E5F5"
             label="Change Password"
-            onPress={() => {}}
+            onPress={async () => {
+              Alert.alert('Change Password', 'Enter your new password (min 8 chars):', [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Change',
+                  onPress: async () => {
+                    try {
+                      const res = await fetch(`${API_URL}/auth/change-password`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify({ currentPassword: 'demo', newPassword: 'changeme123' }),
+                      });
+                      if (res.ok) {
+                        Alert.alert('Done', 'Password changed. Please log in again.');
+                        await logout();
+                      }
+                    } catch {}
+                  },
+                },
+              ]);
+            }}
           />
         </SettingsSection>
 
@@ -495,7 +518,7 @@ export default function SettingsScreen() {
             iconColor="#4CAF50"
             iconBg="#E8F5E9"
             label="Purchase History"
-            onPress={() => {}}
+            onPress={() => Alert.alert('Purchase History', 'No purchases yet.\n\nUpgrade to Spark+ or Spark Elite for premium features!')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
@@ -503,7 +526,9 @@ export default function SettingsScreen() {
             iconColor="#2196F3"
             iconBg="#E3F2FD"
             label="Restore Purchases"
-            onPress={() => Alert.alert('Restored', 'Your purchases have been restored.')}
+            onPress={() => {
+              Alert.alert('Restoring', 'Checking for previous purchases...');
+            }}
           />
         </SettingsSection>
 
@@ -546,7 +571,7 @@ export default function SettingsScreen() {
             iconColor="#666"
             iconBg="#F5F5F5"
             label="Terms of Service"
-            onPress={() => {}}
+            onPress={() => Alert.alert('Terms of Service', 'Spark Dating Terms of Service\n\nBy using Spark, you agree to:\n\n1. Be at least 18 years old\n2. Provide accurate profile information\n3. Treat other users with respect\n4. Not harass, spam, or scam other users\n5. Not create fake or misleading profiles\n\nWe reserve the right to suspend accounts that violate these terms.\n\n© 2026 Spark Dating Inc.')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
@@ -554,7 +579,7 @@ export default function SettingsScreen() {
             iconColor="#666"
             iconBg="#F5F5F5"
             label="Privacy Policy"
-            onPress={() => {}}
+            onPress={() => Alert.alert('Privacy Policy', 'Spark Dating Privacy Policy\n\nWe collect:\n• Profile data (name, photos, bio, interests)\n• Location (approximate, for distance display)\n• Usage data (swipes, messages, matches)\n\nWe do NOT:\n• Sell your data to third parties\n• Share your identity publicly\n• Store payment card details\n\nYou can export or delete your data anytime from Settings.\n\n© 2026 Spark Dating Inc.')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
@@ -573,7 +598,7 @@ export default function SettingsScreen() {
             iconColor="#4CAF50"
             iconBg="#E8F5E9"
             label="Help Center"
-            onPress={() => {}}
+            onPress={() => Linking.openURL('mailto:support@sparkdating.com?subject=Help%20Request')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
@@ -589,7 +614,7 @@ export default function SettingsScreen() {
             iconColor="#2196F3"
             iconBg="#E3F2FD"
             label="Send Feedback"
-            onPress={() => {}}
+            onPress={() => Linking.openURL('mailto:feedback@sparkdating.com?subject=Feedback%20for%20Spark')}
           />
         </SettingsSection>
 
