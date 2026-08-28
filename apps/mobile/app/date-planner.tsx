@@ -7,7 +7,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, inte
 import { useAuthStore } from '../stores/auth';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../services/config';
 
 interface DateIdea {
   id: string;

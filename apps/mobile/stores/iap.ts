@@ -4,6 +4,7 @@ import { safeStorage } from '../services/storage';
 import type { SubscriptionTier, ConsumableType } from '../services/iapProducts';
 import { getAllProductIds } from '../services/iapProducts';
 import { useAuthStore } from './auth';
+import { API_URL } from '../services/config';
 
 // ── Try to load react-native-iap ──────────────────────────────────
 // Falls back to mock mode if the native module isn't available.
@@ -149,7 +150,7 @@ export const useIAPStore = create<IAPState>()(
               try {
                 const apiToken = useAuthStore.getState().token;
                 if (apiToken) {
-                  await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001'}/subscriptions`, {
+                  await fetch(`${API_URL}/subscriptions`, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',

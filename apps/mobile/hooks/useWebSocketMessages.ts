@@ -30,7 +30,7 @@ interface UseWebSocketMessagesReturn {
   sendTyping: (isTyping: boolean) => void;
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../services/config';
 
 export function useWebSocketMessages({
   matchId,

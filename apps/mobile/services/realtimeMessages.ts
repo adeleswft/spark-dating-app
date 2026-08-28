@@ -4,7 +4,7 @@
  * with the deployed API at EXPO_PUBLIC_API_URL.
  */
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from './config';
 
 // Types
 export interface Message {

@@ -21,7 +21,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const PHOTO_GAP = 4;
 const MAX_PHOTOS = 9;
 const MAX_INTERESTS = 15;
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../services/config';
 
 type EditSection = 'overview' | 'photos' | 'bio' | 'interests';
 

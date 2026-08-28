@@ -10,6 +10,14 @@ const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'producti
 const banCache = new Map<string, { banned: boolean; suspended: boolean; checkedAt: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
+// Periodic cleanup: remove entries older than 2x TTL to prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of banCache) {
+    if (now - val.checkedAt > CACHE_TTL_MS * 2) banCache.delete(key);
+  }
+}, 60_000);
+
 export const authMiddleware = async (c: Context, next: Next) => {
   const authHeader = c.req.header('Authorization');
   

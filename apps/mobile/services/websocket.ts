@@ -3,7 +3,7 @@
  * Alternative to Supabase Realtime — connects directly to the API's WebSocket server.
  */
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from './config';
 const WS_URL = API_URL.replace(/^http/, 'ws') + '/ws';
 
 export interface WSMessage {

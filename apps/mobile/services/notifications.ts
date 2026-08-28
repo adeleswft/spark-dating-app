@@ -27,7 +27,7 @@ try {
   console.warn('[Notifications] Failed to set handler:', e);
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from './config';
 
 /**
  * Register for push notifications and send token to server.

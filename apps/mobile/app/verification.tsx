@@ -17,7 +17,7 @@ import { useScreenshotPrevention } from '../hooks/useScreenshotPrevention';
 import { useAuthStore } from '../stores/auth';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../services/config';
 
 type VerificationStep = 'overview' | 'photo-capture' | 'photo-liveness' | 'photo-match' | 'id-capture' | 'id-capture-back' | 'id-analysis' | 'complete';
 type VerificationType = 'photo' | 'id' | 'both';

@@ -1,4 +1,6 @@
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from './config';
+
+export const API_BASE_URL = API_URL;
 
 interface ApiResponse<T> {
   data: T;

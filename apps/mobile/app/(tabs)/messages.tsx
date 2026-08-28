@@ -1,14 +1,15 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image, RefreshControl } from 'react-native';
+import { View, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image, RefreshControl, Alert } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useRealtimeMessages } from '../../hooks/useRealtimeMessages';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { useAuthStore } from '../../stores/auth';
 import { Message as MessageType } from '../../services/realtimeMessages';
 import { useScreenshotPrevention } from '../../hooks/useScreenshotPrevention';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../../services/config';
 
 interface Conversation {
   id: string;
@@ -126,6 +127,7 @@ function MessageBubble({ message, isMine }: { message: MessageType; isMine: bool
 }
 
 export default function MessagesScreen() {
+  const router = useRouter();
   const { user, token } = useAuthStore();
   useScreenshotPrevention();
   const [conversations, setConversations] = useState<Conversation[]>(SAMPLE_CONVERSATIONS);
@@ -235,7 +237,7 @@ export default function MessagesScreen() {
     <KeyboardAvoidingView style={styles.chatContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
       <View style={styles.chatHeader}>
         <IconButton icon="arrow-left" size={24} onPress={() => setSelectedConversation(null)} style={styles.backButton} iconColor="#F5EDE3" />
-        <TouchableOpacity style={styles.chatHeaderInfo} onPress={() => {}}>
+        <TouchableOpacity style={styles.chatHeaderInfo} onPress={() => { if (selectedConversation?.id) router.push({ pathname: '/profile-review', params: { userId: selectedConversation.id } }); }}>
           <ConversationAvatar photo={selectedConversation.photo} name={selectedConversation.name} size={38} />
           <View style={styles.chatHeaderText}>
             <View style={styles.chatNameRow}>
@@ -245,8 +247,8 @@ export default function MessagesScreen() {
             <Text variant="bodySmall" style={[styles.onlineStatus, { color: isOnline ? '#E84855' : '#5A5060' }]}>{isOnline ? 'Online now' : 'Offline'}</Text>
           </View>
         </TouchableOpacity>
-        <IconButton icon="phone" size={20} onPress={() => {}} style={styles.headerAction} iconColor="#8A7E90" />
-        <IconButton icon="video" size={20} onPress={() => {}} style={styles.headerAction} iconColor="#8A7E90" />
+        <IconButton icon="phone" size={20} onPress={() => Alert.alert('Coming Soon', 'Voice calls will be available in a future update!')} style={styles.headerAction} iconColor="#8A7E90" />
+        <IconButton icon="video" size={20} onPress={() => Alert.alert('Coming Soon', 'Video calls will be available in a future update!')} style={styles.headerAction} iconColor="#8A7E90" />
       </View>
 
       <FlatList ref={flatListRef} data={messages} renderItem={({ item }) => <MessageBubble message={item} isMine={item.sender_id === currentUserId} />} keyExtractor={(item) => item.id} contentContainerStyle={styles.messagesList} onRefresh={loadMore} refreshing={loading}
@@ -256,8 +258,8 @@ export default function MessagesScreen() {
       {otherUserTyping && <TypingIndicator />}
 
       <View style={styles.inputContainer}>
-        <IconButton icon="camera" size={20} onPress={() => {}} style={styles.inputAction} iconColor="#8A7E90" />
-        <IconButton icon="image" size={20} onPress={() => {}} style={styles.inputAction} iconColor="#8A7E90" />
+        <IconButton icon="camera" size={20} onPress={() => Alert.alert('Coming Soon', 'Camera sharing will be available in a future update!')} style={styles.inputAction} iconColor="#8A7E90" />
+        <IconButton icon="image" size={20} onPress={() => Alert.alert('Coming Soon', 'Image sharing will be available in a future update!')} style={styles.inputAction} iconColor="#8A7E90" />
         <TextInput ref={inputRef} style={styles.textInput} placeholder="Say something..." placeholderTextColor="#5A5060" value={messageText} onChangeText={handleTextChange} multiline maxLength={2000} />
         <TouchableOpacity style={[styles.sendButton, !messageText.trim() && styles.sendButtonDisabled]} onPress={handleSend} disabled={!messageText.trim()}>
           <MaterialCommunityIcons name="send" size={18} color={messageText.trim() ? '#FFF' : '#5A5060'} />

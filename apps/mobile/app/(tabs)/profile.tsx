@@ -7,7 +7,7 @@ import { useAuthStore } from '../../stores/auth';
 import { useIAPStore } from '../../stores/iap';
 import ConsumablePurchaseSheet from '../../components/ConsumablePurchaseSheet';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../../services/config';
 
 interface UserProfile {
   name: string;

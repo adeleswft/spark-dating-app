@@ -15,7 +15,7 @@ import { useAuthStore } from '../stores/auth';
 import { useNotificationsStore } from '../stores/notifications';
 import * as FileSystem from 'expo-file-system';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { API_URL } from '../services/config';
 
 // Section component
 function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -549,7 +549,7 @@ export default function SettingsScreen() {
             iconBg="#FFF3E0"
             label="Language"
             value="English"
-            onPress={() => {}}
+            onPress={() => Alert.alert('Coming Soon', 'Language selection will be available in a future update!')}
           />
           <Divider style={styles.rowDivider} />
           <SettingLink
